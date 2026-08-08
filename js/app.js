@@ -18,6 +18,12 @@ let motivationInterval = null;
 
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', () => {
+    // Paywall Protection: Redirect to landing.html if access has not been unlocked
+    if (!localStorage.getItem('studyhub_paid_access')) {
+        window.location.href = 'landing.html';
+        return;
+    }
+
     loadState();
     checkAndUpdateStreak();
     applyTheme();

@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyHub — We Built Your Sanctuary</title>
+    <meta name="description" content="Combine beautifully curated lofi rooms, real-time Pomodoro, smart trackers, and AI study-buddies into one gorgeous, unified space.">
+    <link rel="icon" href="assets/icons/icon-192.png">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #060614;
+            --card-bg: rgba(13, 13, 35, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --purple: #6C5CE7;
+            --cyan: #00CEFF;
+            --cyan-glow: rgba(0, 206, 255, 0.35);
+            --purple-glow: rgba(108, 92, 231, 0.35);
+            --text-main: #FFFFFF;
+            --text-muted: rgba(255, 255, 255, 0.65);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 15%, rgba(108, 92, 231, 0.18) 0%, transparent 40%),
+                radial-gradient(circle at 90% 45%, rgba(0, 206, 255, 0.15) 0%, transparent 45%),
+                radial-gradient(circle at 50% 85%, rgba(108, 92, 231, 0.2) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .container {
+            width: min(1180px, 92vw);
+            margin: 0 auto;
+        }
+
+        /* HEADER / NAVBAR */
+        header {
+            padding: 22px 0;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(6, 6, 20, 0.85);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .nav-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        .logo-tag {
+            font-size: 0.65rem;
+            background: rgba(0, 206, 255, 0.15);
+            color: var(--cyan);
+            border: 1px solid rgba(0, 206, 255, 0.3);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 800;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .lang-switch-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.25s;
+        }
+        .lang-switch-btn:hover {
+            border-color: var(--cyan);
+            background: rgba(0, 206, 255, 0.12);
+        }
+
+        .nav-btn-cta {
+            padding: 10px 24px;
+            border-radius: 30px;
+            background: linear-gradient(135deg, #00CEFF 0%, #6C5CE7 100%);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 0.88rem;
+            box-shadow: 0 4px 20px var(--cyan-glow);
+            transition: all 0.25s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .nav-btn-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px var(--cyan-glow);
+        }
+
+        /* HERO SECTION */
+        .hero {
+            padding: 85px 0 60px;
+            text-align: center;
+        }
+
+        .pill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 18px;
+            border-radius: 30px;
+            background: rgba(108, 92, 231, 0.12);
+            border: 1px solid rgba(108, 92, 231, 0.35);
+            color: #ffb86c;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 26px;
+            letter-spacing: 0.5px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.4rem, 5vw, 4.2rem);
+            font-weight: 900;
+            line-height: 1.15;
+            margin-bottom: 22px;
+            letter-spacing: -1px;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, #00CEFF 0%, #6C5CE7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: clamp(1.02rem, 1.8vw, 1.22rem);
+            color: var(--text-muted);
+            max-width: 660px;
+            margin: 0 auto 38px;
+            line-height: 1.6;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 42px;
+            border-radius: 30px;
+            background: linear-gradient(135deg, #00CEFF 0%, #6C5CE7 100%);
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.08rem;
+            font-weight: 800;
+            box-shadow: 0 10px 35px var(--cyan-glow);
+            transition: all 0.25s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .hero-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 45px var(--cyan-glow);
+        }
+
+        /* APP MOCKUP WINDOW */
+        .app-mockup {
+            margin-top: 55px;
+            background: rgba(10, 10, 30, 0.85);
+            border: 1px solid rgba(0, 206, 255, 0.25);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 206, 255, 0.15);
+            text-align: left;
+        }
+
+        .mockup-header {
+            background: rgba(5, 5, 18, 0.9);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .window-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27c93f; }
+
+        .mockup-status {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--cyan);
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .mockup-body {
+            padding: 32px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            align-items: center;
+            background: radial-gradient(circle at 30% 50%, rgba(108, 92, 231, 0.15), transparent 70%);
+        }
+
+        .timer-box {
+            background: rgba(15, 15, 45, 0.7);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 32px;
+            text-align: center;
+        }
+
+        .timer-val {
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--cyan);
+            letter-spacing: -2px;
+            margin: 10px 0;
+            text-shadow: 0 0 25px rgba(0, 206, 255, 0.4);
+        }
+
+        .timer-mode-pills {
+            display: inline-flex;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px;
+            border-radius: 12px;
+        }
+
+        .t-pill {
+            padding: 4px 14px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            border-radius: 8px;
+            color: var(--text-muted);
+        }
+
+        .t-pill.active {
+            background: var(--purple);
+            color: #fff;
+        }
+
+        .quests-box {
+            background: rgba(15, 15, 45, 0.7);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 24px;
+        }
+
+        .quest-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .quest-xp {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #2ed573;
+            background: rgba(46, 213, 115, 0.15);
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        /* FOUNDER STORY CARD */
+        .story-section {
+            padding: 70px 0;
+        }
+
+        .story-card {
+            max-width: 760px;
+            margin: 0 auto;
+            background: rgba(13, 13, 38, 0.75);
+            border: 1.5px solid rgba(0, 206, 255, 0.3);
+            border-radius: 24px;
+            padding: 42px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .story-card h2 {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--cyan);
+            margin-bottom: 16px;
+        }
+
+        .story-card p {
+            color: var(--text-muted);
+            font-size: 0.98rem;
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+
+        .author-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* FEATURES SECTION */
+        .features-section {
+            padding: 60px 0 90px;
+            text-align: center;
+        }
+
+        .sec-badge {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--purple);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .sec-title-main {
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin-bottom: 48px;
+        }
+
+        .grid-6-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            text-align: left;
+        }
+
+        .f-box {
+            background: rgba(13, 13, 38, 0.75);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 32px;
+            transition: all 0.3s ease;
+        }
+
+        .f-box:hover {
+            border-color: rgba(0, 206, 255, 0.35);
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .f-box-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(0, 206, 255, 0.12);
+            border: 1px solid rgba(0, 206, 255, 0.25);
+            color: var(--cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-bottom: 18px;
+        }
+
+        .f-box h3 {
+            font-size: 1.18rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .f-box p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.65;
+        }
+
+        /* PRICING SECTION */
+        .pricing-section {
+            padding: 70px 0 120px;
+            text-align: center;
+        }
+
+        .pricing-card {
+            max-width: 520px;
+            margin: 0 auto;
+            background: rgba(13, 13, 38, 0.9);
+            border: 2px solid rgba(0, 206, 255, 0.5);
+            border-radius: 28px;
+            padding: 48px 38px;
+            box-shadow: 0 25px 70px rgba(0, 206, 255, 0.25);
+            position: relative;
+        }
+
+        .price-badge-top {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            font-size: 0.68rem;
+            font-weight: 800;
+            color: var(--cyan);
+            background: rgba(0, 206, 255, 0.15);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 206, 255, 0.3);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .price-display {
+            font-size: 3.8rem;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .price-display span {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .strike-price {
+            font-size: 0.85rem;
+            color: #ffb86c;
+            font-weight: 700;
+            margin-bottom: 28px;
+            text-decoration: line-through;
+        }
+
+        .price-check-list {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 34px;
+        }
+
+        .price-check-list li {
+            padding: 12px 0;
+            font-size: 0.92rem;
+            color: rgba(255, 255, 255, 0.9);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .price-check-list li span {
+            color: #2ed573;
+            font-weight: 900;
+        }
+
+        .buy-btn-large {
+            width: 100%;
+            padding: 18px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #00CEFF 0%, #6C5CE7 100%);
+            color: #fff;
+            font-size: 1.05rem;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 30px var(--cyan-glow);
+            transition: all 0.25s ease;
+        }
+
+        .buy-btn-large:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 40px var(--cyan-glow);
+        }
+
+        /* PAYMENT MODAL */
+        .payment-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(6, 6, 20, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .payment-card-box {
+            background: rgba(14, 14, 38, 0.96);
+            border: 1.5px solid rgba(0, 206, 255, 0.4);
+            border-radius: 24px;
+            padding: 34px;
+            max-width: 440px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0, 206, 255, 0.3);
+            position: relative;
+        }
+
+        /* FOOTER */
+        footer {
+            padding: 30px 0;
+            border-top: 1px solid var(--card-border);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .footer-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 768px) {
+            .grid-6-features, .mockup-body {
+                grid-template-columns: 1fr;
+            }
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <header>
+        <div class="container nav-content">
+            <div class="logo">
+                📚 StudyHub <span class="logo-tag">v2.0</span>
+            </div>
+            <div class="nav-links">
+                <button onclick="toggleCurrency()" class="lang-switch-btn" id="currencyToggleBtn">
+                    🇮🇩 IDR (Rp 29.000)
+                </button>
+                <button onclick="openPaymentModal()" class="nav-btn-cta" id="navCtaBtn">Buy Access — $2</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div class="container">
+            <div class="pill-badge" id="heroBadge">⚡ Made by Students for Students</div>
+            <h1 id="heroHeadline">Stressed Out by Deadlines?<br><span>We Built Your Sanctuary</span></h1>
+            <p id="heroSubhead">Escape academic burnout. Combine beautifully curated lofi rooms, real-time Pomodoro, smart trackers, and AI study-buddies into one gorgeous, unified space.</p>
+            
+            <button onclick="openPaymentModal()" class="hero-cta" id="heroCtaBtn">
+                🚀 Get Lifetime Access — $2
+            </button>
+
+            <!-- APP MOCKUP FRAME -->
+            <div class="app-mockup">
+                <div class="mockup-header">
+                    <div class="window-dots">
+                        <div class="dot red"></div>
+                        <div class="dot yellow"></div>
+                        <div class="dot green"></div>
+                    </div>
+                    <div class="mockup-status">
+                        <span>🎧 LOFI SCHOLAR v2.0</span> &nbsp;·&nbsp; <span style="color:#ffb86c">1,420 XP LEVEL 14 MAX</span>
+                    </div>
+                </div>
+
+                <div class="mockup-body">
+                    <!-- Left Timer Widget -->
+                    <div class="timer-box">
+                        <div class="timer-mode-pills">
+                            <div class="t-pill active">FOCUS</div>
+                            <div class="t-pill">BREAK</div>
+                        </div>
+                        <div class="timer-val">25 : 00</div>
+                        <div style="font-size:0.8rem;color:var(--text-muted);font-weight:700">Rainy Tokyo Coffee Shop</div>
+                        <div style="font-size:0.7rem;color:var(--cyan);margin-top:4px">Chilled Beats & Thunderstorms 🎵</div>
+                    </div>
+
+                    <!-- Right Active Quests Widget -->
+                    <div class="quests-box">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+                            <span style="font-weight:800;font-size:0.9rem;color:#fff">📌 Active Quests</span>
+                            <span style="font-size:0.75rem;color:var(--text-muted)">3 of 4 Done</span>
+                        </div>
+                        <div class="quest-item">
+                            <span>Draft physics lab report summary</span>
+                            <span class="quest-xp">+50 XP</span>
+                        </div>
+                        <div class="quest-item">
+                            <span>Complete 2 Pomodoro cycles</span>
+                            <span class="quest-xp">+120 XP</span>
+                        </div>
+                        <div class="quest-item">
+                            <span>Solve math quiz with AI Mentor</span>
+                            <span class="quest-xp">+80 XP</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOUNDER STORY CARD -->
+    <section class="story-section">
+        <div class="container">
+            <div class="story-card">
+                <h2 id="storyTitle">Tired of tracking assignments across 5 different apps?</h2>
+                <p id="storyDesc">We got sick of losing our minds copying exam dates from Canvas to Notion, finding playlists on Spotify, timing sessions on third-party websites, and chatting on Discord. StudyHub is our clean answer: A beautiful, gamified, self-contained dashboard engineered to keep you chill and highly productive.</p>
+                <div class="author-tag">
+                    <span style="font-size:1.4rem">👨‍🎓</span> — Leo, Founder & Stanford Sophomore
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES SECTION -->
+    <section class="features-section" id="features">
+        <div class="container">
+            <span class="sec-badge">UNBEATABLE TOOLKIT</span>
+            <h2 class="sec-title-main" id="featureTitle">Engineered for Academic Dominance</h2>
+
+            <div class="grid-6-features">
+                <div class="f-box">
+                    <div class="f-box-icon">🎵</div>
+                    <h3>Lofi Audio & Rain Ambient</h3>
+                    <p>Stream uninterrupted study beats, synthwave loops, and dynamic weather overlays: rain, crackling vinyl, thunderstorm rumblings, and cafe white noise.</p>
+                </div>
+
+                <div class="f-box">
+                    <div class="f-box-icon">📊</div>
+                    <h3>GPA Predictor & Calculator</h3>
+                    <p>Log course letter grades as you go, know real-time prospective grades for finals, and set warning metrics to shield your GPA before it dips.</p>
+                </div>
+
+                <div class="f-box">
+                    <div class="f-box-icon">🤖</div>
+                    <h3>24/7 AI Academic Mentor Chat</h3>
+                    <p>Upload heavy lecture PDF files, get simplified summaries, instant homework answers, and customizable mock exam quizzes generated on the fly.</p>
+                </div>
+
+                <div class="f-box">
+                    <div class="f-box-icon">⏱️</div>
+                    <h3>Pomodoro Focus & RPG Level Up</h3>
+                    <p>Gamify your grind. Earn XP, collect legendary avatars, embark on global study leaderboard challenges, and unlock rare rewards for logging in.</p>
+                </div>
+
+                <div class="f-box">
+                    <div class="f-box-icon">☁️</div>
+                    <h3>Multi-Device Cloud Sync</h3>
+                    <p>Seamlessly transfer your live workspace between laptop, tablet, and mobile. Pick up your timer and quest log exactly where you left off.</p>
+                </div>
+
+                <div class="f-box">
+                    <div class="f-box-icon">📱</div>
+                    <h3>Offline PWA Ready</h3>
+                    <p>Weak school Wi-Fi is no problem. Install StudyHub directly as an offline desktop app. Log study hours and task progress without an internet signal.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRICING SECTION -->
+    <section class="pricing-section" id="pricing">
+        <div class="container">
+            <span class="sec-badge">LIFETIME LAUNCH PRICE</span>
+            <h2 class="sec-title-main">Get In Early. Stay Productive Forever.</h2>
+
+            <div class="pricing-card">
+                <div class="price-badge-top">
+                    🎗️ LIFETIME PROMO (SAVE 80%) &nbsp;·&nbsp; LIMITED TO FIRST 500 STUDENTS
+                </div>
+                
+                <div class="price-display" id="priceDisplay">
+                    $2 <span>/ One-Time</span>
+                </div>
+                <div class="strike-price" id="strikeDisplay">$19.99 regular price</div>
+
+                <ul class="price-check-list">
+                    <li><span>✓</span> Lifetime Access — No recurring subscriptions</li>
+                    <li><span>✓</span> All Lofi Rooms & Premium Ambient Sounds</li>
+                    <li><span>✓</span> Unlimited AI Study Buddy Mentor generation</li>
+                    <li><span>✓</span> Custom RPG Avatar & Leaderboard inclusion</li>
+                    <li><span>✓</span> Multi-Device Cloud Syncing enabled</li>
+                    <li><span>✓</span> Lifetime software updates & feature additions</li>
+                </ul>
+
+                <button onclick="openPaymentModal()" class="buy-btn-large" id="priceCtaBtn">
+                    🔒 Buy Now (Instant Access)
+                </button>
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:12px">🔒 Secured checkout. Instant workspace activation.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container footer-content">
+            <div>© 2026 StudyHub. All rights reserved. Built with 💜 for students worldwide.</div>
+            <div style="display:flex;gap:20px">
+                <a href="#" style="color:var(--text-muted);text-decoration:none">Terms of Service</a>
+                <a href="#" style="color:var(--text-muted);text-decoration:none">Privacy Policy</a>
+                <a href="#" style="color:var(--text-muted);text-decoration:none">Student Support</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- DYNAMIC GLOBAL / INDONESIA PAYMENT MODAL -->
+    <div id="paymentModal" class="payment-overlay" style="display:none">
+        <div class="payment-card-box" id="paymentCardContent">
+            <!-- Rendered dynamically based on active currency -->
+        </div>
+    </div>
+
+    <script>
+        let currentCurrency = 'IDR'; // 'IDR' | 'USD'
+
+        function toggleCurrency() {
+            currentCurrency = currentCurrency === 'IDR' ? 'USD' : 'IDR';
+            updateLandingCurrencyUI();
+        }
+
+        function updateLandingCurrencyUI() {
+            const toggleBtn = document.getElementById('currencyToggleBtn');
+            const navCtaBtn = document.getElementById('navCtaBtn');
+            const heroCtaBtn = document.getElementById('heroCtaBtn');
+            const priceDisplay = document.getElementById('priceDisplay');
+            const strikeDisplay = document.getElementById('strikeDisplay');
+            const priceCtaBtn = document.getElementById('priceCtaBtn');
+
+            if (currentCurrency === 'IDR') {
+                if (toggleBtn) toggleBtn.innerHTML = '🇮🇩 IDR (Rp 29.000)';
+                if (navCtaBtn) navCtaBtn.innerText = 'Beli Akses — Rp 29k';
+                if (heroCtaBtn) heroCtaBtn.innerText = '🚀 Beli Akses Sekali — Rp 29.000';
+                if (priceDisplay) priceDisplay.innerHTML = 'Rp 29.000 <span>/ Sekali Bayar</span>';
+                if (strikeDisplay) strikeDisplay.innerText = 'Rp 149.000 harga normal';
+                if (priceCtaBtn) priceCtaBtn.innerText = '🔒 Beli Sekarang (QRIS Instant)';
+            } else {
+                if (toggleBtn) toggleBtn.innerHTML = '🌐 USD ($2.00)';
+                if (navCtaBtn) navCtaBtn.innerText = 'Buy Access — $2';
+                if (heroCtaBtn) heroCtaBtn.innerText = '🚀 Get Lifetime Access — $2';
+                if (priceDisplay) priceDisplay.innerHTML = '$2 <span>/ One-Time</span>';
+                if (strikeDisplay) strikeDisplay.innerText = '$19.99 regular price';
+                if (priceCtaBtn) priceCtaBtn.innerText = '🔒 Buy Now (Credit Card / PayPal)';
+            }
+        }
+
+        function openPaymentModal() {
+            const modal = document.getElementById('paymentModal');
+            const content = document.getElementById('paymentCardContent');
+            modal.style.display = 'flex';
+
+            if (currentCurrency === 'IDR') {
+                content.innerHTML = `
+                    <button onclick="closePaymentModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer">❌</button>
+                    <div style="font-size:0.75rem;color:var(--cyan);font-weight:800;letter-spacing:1px;text-transform:uppercase">MIDTRANS / QRIS INSTANT PAYMENT</div>
+                    <h3 style="font-size:1.3rem;font-weight:900;margin-top:6px">Pembelian Lisensi Lifetime</h3>
+                    <p style="font-size:0.85rem;color:var(--text-muted);margin-top:4px">Scan QRIS di bawah dengan GoPay, ShopeePay, OVO, Dana, atau Mobile Banking.</p>
+
+                    <div style="width:190px;height:190px;margin:18px auto;background:#fff;border-radius:16px;padding:10px;display:flex;align-items:center;justify-content:center">
+                        <svg width="170" height="170" viewBox="0 0 100 100" fill="none">
+                            <rect width="100" height="100" fill="white"/>
+                            <rect x="10" y="10" width="25" height="25" fill="black"/>
+                            <rect x="15" y="15" width="15" height="15" fill="white"/>
+                            <rect x="19" y="19" width="7" height="7" fill="black"/>
+                            <rect x="65" y="10" width="25" height="25" fill="black"/>
+                            <rect x="70" y="15" width="15" height="15" fill="white"/>
+                            <rect x="74" y="19" width="7" height="7" fill="black"/>
+                            <rect x="10" y="65" width="25" height="25" fill="black"/>
+                            <rect x="15" y="70" width="15" height="15" fill="white"/>
+                            <rect x="19" y="74" width="7" height="7" fill="black"/>
+                            <rect x="42" y="10" width="6" height="6" fill="black"/>
+                            <rect x="52" y="18" width="6" height="6" fill="black"/>
+                            <rect x="40" y="30" width="10" height="10" fill="black"/>
+                            <rect x="60" y="45" width="8" height="8" fill="black"/>
+                            <rect x="20" y="45" width="12" height="6" fill="black"/>
+                            <rect x="70" y="70" width="15" height="15" fill="black"/>
+                            <rect x="45" y="65" width="10" height="20" fill="black"/>
+                        </svg>
+                    </div>
+
+                    <div style="font-size:1.4rem;font-weight:900;color:var(--cyan);margin-bottom:14px">Total: Rp 29.000</div>
+                    <button onclick="simulatePaymentSuccess()" class="buy-btn-large" style="padding:14px">
+                        ✅ Selesai Bayar ➔ Masuk Aplikasi
+                    </button>
+                `;
+            } else {
+                content.innerHTML = `
+                    <button onclick="closePaymentModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer">❌</button>
+                    <div style="font-size:0.75rem;color:var(--cyan);font-weight:800;letter-spacing:1px;text-transform:uppercase">GLOBAL STRIPE / PAYPAL CHECKOUT</div>
+                    <h3 style="font-size:1.3rem;font-weight:900;margin-top:6px">Lifetime Access Purchase</h3>
+                    <p style="font-size:0.85rem;color:var(--text-muted);margin-top:4px">Pay securely via Credit Card, Apple Pay, or PayPal.</p>
+
+                    <div style="display:flex;flex-direction:column;gap:12px;margin:24px 0">
+                        <button class="buy-btn-large" style="background:#635BFF;padding:12px;font-size:0.95rem" onclick="simulatePaymentSuccess()">
+                            💳 Pay with Credit Card / Apple Pay ($2.00)
+                        </button>
+                        <button class="buy-btn-large" style="background:#0070BA;padding:12px;font-size:0.95rem" onclick="simulatePaymentSuccess()">
+                            🅿️ Pay with PayPal ($2.00)
+                        </button>
+                    </div>
+
+                    <div style="font-size:0.75rem;color:var(--text-muted)">🔒 SSL Encrypted & Instant Access</div>
+                `;
+            }
+        }
+
+        function closePaymentModal() {
+            document.getElementById('paymentModal').style.display = 'none';
+        }
+
+        function simulatePaymentSuccess() {
+            localStorage.setItem('studyhub_paid_access', 'true');
+            alert('🎉 Payment Successful! Welcome to StudyHub Lifetime.');
+            window.location.href = 'index.html';
+        }
+
+        // Auto Geo-Detect initial language
+        document.addEventListener('DOMContentLoaded', () => {
+            const userLang = navigator.language || navigator.userLanguage;
+            if (userLang && (userLang.includes('id') || userLang.includes('ID'))) {
+                currentCurrency = 'IDR';
+            } else {
+                currentCurrency = 'USD';
+            }
+            updateLandingCurrencyUI();
+        });
+    </script>
+</body>
+</html>
