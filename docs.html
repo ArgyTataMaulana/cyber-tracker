@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyHub v2 — Project Documentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ===================== TOKENS ===================== */
+        :root {
+            --bg-body: #07071a;
+            --bg-primary: #0c0c24;
+            --bg-card: rgba(18, 18, 50, 0.65);
+            --bg-card-alt: rgba(25, 25, 60, 0.5);
+            --bg-sidebar: rgba(10, 10, 30, 0.92);
+            --bg-code: rgba(0,0,0,0.35);
+            --border: rgba(255,255,255,0.06);
+            --border-hover: rgba(255,255,255,0.12);
+            --text-primary: #f0f0ff;
+            --text-secondary: #8888aa;
+            --text-muted: #555577;
+            --purple: #6C5CE7;
+            --purple-soft: rgba(108,92,231,0.12);
+            --cyan: #00CEFF;
+            --cyan-soft: rgba(0,206,255,0.10);
+            --green: #00E09E;
+            --green-soft: rgba(0,224,158,0.10);
+            --orange: #FFA502;
+            --orange-soft: rgba(255,165,2,0.10);
+            --pink: #FF6B9D;
+            --pink-soft: rgba(255,107,157,0.10);
+            --red: #FF4757;
+            --red-soft: rgba(255,71,87,0.10);
+            --yellow: #FECA57;
+            --gradient-main: linear-gradient(135deg, #6C5CE7, #00CEFF);
+            --gradient-warm: linear-gradient(135deg, #FFA502, #FF6B9D);
+            --gradient-cool: linear-gradient(135deg, #00CEFF, #00E09E);
+            --radius: 14px;
+            --radius-sm: 8px;
+            --radius-xl: 24px;
+            --font: 'Inter', system-ui, sans-serif;
+            --mono: 'JetBrains Mono', monospace;
+        }
+
+        /* ===================== RESET ===================== */
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; scroll-padding-top:80px; }
+        body {
+            font-family: var(--font);
+            background: var(--bg-body);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* ===================== BG EFFECTS ===================== */
+        .bg-blobs {
+            position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;
+        }
+        .blob {
+            position:absolute; border-radius:50%; filter:blur(120px);
+            animation: blobDrift 25s ease-in-out infinite;
+        }
+        .blob-1 { width:600px; height:600px; background:var(--purple); top:-200px; left:-150px; opacity:0.10; }
+        .blob-2 { width:500px; height:500px; background:var(--cyan); bottom:-150px; right:-120px; opacity:0.08; animation-delay:-9s; }
+        .blob-3 { width:350px; height:350px; background:var(--pink); top:40%; left:60%; opacity:0.06; animation-delay:-16s; }
+        @keyframes blobDrift {
+            0%,100% { transform:translate(0,0) scale(1); }
+            33% { transform:translate(50px,-40px) scale(1.06); }
+            66% { transform:translate(-30px,40px) scale(0.94); }
+        }
+
+        /* ===================== LAYOUT ===================== */
+        .layout { display:flex; min-height:100vh; position:relative; z-index:1; }
+
+        /* ===================== SIDEBAR ===================== */
+        .sidebar {
+            width:280px; position:fixed; top:0; left:0; bottom:0;
+            background: var(--bg-sidebar);
+            backdrop-filter: blur(24px);
+            border-right: 1px solid var(--border);
+            padding: 28px 0;
+            overflow-y: auto;
+            z-index:100;
+            transition: transform 0.3s ease;
+        }
+        .sidebar-brand {
+            display:flex; align-items:center; gap:12px;
+            padding: 0 24px 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom:20px;
+        }
+        .sidebar-brand svg { flex-shrink:0; }
+        .sidebar-brand h1 {
+            font-size:1.3rem; font-weight:800;
+            background:var(--gradient-main);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+        }
+        .sidebar-brand small { display:block; font-size:0.65rem; color:var(--text-muted); font-weight:500; letter-spacing:0.5px; text-transform:uppercase; }
+        .sidebar-label {
+            font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1.5px;
+            color:var(--text-muted); padding:16px 24px 8px; 
+        }
+        .sidebar-nav { list-style:none; }
+        .sidebar-nav li a {
+            display:flex; align-items:center; gap:10px;
+            padding:10px 24px; font-size:0.85rem; font-weight:500;
+            color:var(--text-secondary); text-decoration:none;
+            border-left:3px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .sidebar-nav li a:hover, .sidebar-nav li a.active {
+            color:var(--text-primary);
+            background: rgba(108,92,231,0.08);
+            border-left-color: var(--purple);
+        }
+        .sidebar-nav li a .nav-emoji { font-size:1rem; width:22px; text-align:center; }
+        .sidebar-nav li a .nav-badge {
+            margin-left:auto; font-size:0.65rem; font-weight:700;
+            background:var(--purple-soft); color:var(--purple);
+            padding:2px 8px; border-radius:20px;
+        }
+
+        /* ===================== MAIN ===================== */
+        .main { flex:1; margin-left:280px; padding:40px 56px 80px; max-width:900px; }
+
+        /* ===================== TOPBAR (MOBILE) ===================== */
+        .topbar {
+            display:none; position:fixed; top:0; left:0; right:0;
+            background: var(--bg-sidebar); backdrop-filter:blur(20px);
+            border-bottom:1px solid var(--border);
+            padding:14px 20px; z-index:200;
+            align-items:center; justify-content:space-between;
+        }
+        .topbar h1 { font-size:1.1rem; font-weight:800; background:var(--gradient-main); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .hamburger { background:none; border:none; color:var(--text-primary); font-size:1.4rem; cursor:pointer; padding:4px; }
+        .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99; }
+
+        /* ===================== HERO ===================== */
+        .hero {
+            position:relative; padding:48px 40px; border-radius:var(--radius-xl);
+            background: var(--bg-card);
+            border:1px solid var(--border);
+            margin-bottom:48px; overflow:hidden;
+        }
+        .hero::before {
+            content:''; position:absolute; top:0; left:0; right:0; height:4px;
+            background:var(--gradient-main);
+        }
+        .hero-badge {
+            display:inline-flex; align-items:center; gap:6px;
+            font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1.5px;
+            color:var(--cyan); background:var(--cyan-soft);
+            padding:6px 14px; border-radius:20px; margin-bottom:16px;
+        }
+        .hero h1 {
+            font-size:2.4rem; font-weight:900; line-height:1.2; margin-bottom:12px;
+            background:var(--gradient-main);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+        }
+        .hero p { font-size:1.05rem; color:var(--text-secondary); max-width:600px; line-height:1.8; }
+        .hero-meta {
+            display:flex; gap:20px; margin-top:24px; flex-wrap:wrap;
+        }
+        .hero-meta-item {
+            display:flex; align-items:center; gap:8px;
+            font-size:0.8rem; color:var(--text-muted); font-weight:500;
+        }
+        .hero-meta-item span { color:var(--text-secondary); }
+
+        /* ===================== SECTION ===================== */
+        .doc-section { margin-bottom:56px; }
+        .doc-section > h2 {
+            font-size:1.5rem; font-weight:800; margin-bottom:8px;
+            display:flex; align-items:center; gap:12px;
+            padding-top:8px;
+        }
+        .doc-section > h2 .sec-emoji { font-size:1.3rem; }
+        .doc-section > .sec-desc {
+            font-size:0.9rem; color:var(--text-secondary); margin-bottom:28px;
+        }
+
+        h3 {
+            font-size:1.15rem; font-weight:700; margin:32px 0 12px;
+            display:flex; align-items:center; gap:10px;
+        }
+        h4 {
+            font-size:0.95rem; font-weight:700; margin:20px 0 8px;
+            color:var(--cyan);
+        }
+
+        /* ===================== CARDS ===================== */
+        .card {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+            padding:24px 28px; margin-bottom:16px;
+            transition: border-color 0.3s;
+        }
+        .card:hover { border-color:var(--border-hover); }
+        .card h4 { margin-top:0; }
+
+        .card-grid {
+            display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:16px; margin-bottom:16px;
+        }
+        .card-grid .card { margin-bottom:0; }
+
+        .mini-card {
+            background:var(--bg-card-alt); border:1px solid var(--border); border-radius:var(--radius-sm);
+            padding:16px 20px; display:flex; align-items:flex-start; gap:14px;
+        }
+        .mini-card .mc-icon {
+            width:40px; height:40px; border-radius:10px;
+            display:flex; align-items:center; justify-content:center;
+            font-size:1.2rem; flex-shrink:0;
+        }
+        .mc-purple { background:var(--purple-soft); }
+        .mc-cyan { background:var(--cyan-soft); }
+        .mc-green { background:var(--green-soft); }
+        .mc-orange { background:var(--orange-soft); }
+        .mc-pink { background:var(--pink-soft); }
+        .mini-card h5 { font-size:0.85rem; font-weight:700; margin-bottom:2px; }
+        .mini-card p { font-size:0.78rem; color:var(--text-secondary); line-height:1.5; }
+
+        /* ===================== TABLES ===================== */
+        .table-wrap { overflow-x:auto; margin:16px 0; border-radius:var(--radius); border:1px solid var(--border); }
+        table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+        thead { background:rgba(108,92,231,0.08); }
+        th {
+            text-align:left; padding:12px 16px; font-weight:700; font-size:0.75rem;
+            text-transform:uppercase; letter-spacing:0.8px; color:var(--text-secondary);
+            border-bottom:1px solid var(--border);
+        }
+        td { padding:11px 16px; border-bottom:1px solid var(--border); }
+        tr:last-child td { border-bottom:none; }
+        tr:hover td { background:rgba(255,255,255,0.02); }
+        td code {
+            font-family:var(--mono); font-size:0.8rem;
+            background:var(--bg-code); padding:2px 7px; border-radius:4px;
+        }
+
+        /* ===================== CODE ===================== */
+        pre {
+            background:var(--bg-code); border:1px solid var(--border); border-radius:var(--radius-sm);
+            padding:20px 24px; overflow-x:auto; margin:16px 0;
+            font-family:var(--mono); font-size:0.82rem; line-height:1.8; color:#c8c8e0;
+        }
+        code { font-family:var(--mono); }
+        p code, li code {
+            font-size:0.82rem; background:var(--bg-code); padding:2px 7px; border-radius:4px;
+        }
+
+        /* ===================== ALERTS ===================== */
+        .alert {
+            padding:18px 22px; border-radius:var(--radius-sm); margin:16px 0;
+            font-size:0.88rem; display:flex; align-items:flex-start; gap:12px;
+            border:1px solid;
+        }
+        .alert-icon { font-size:1.1rem; flex-shrink:0; margin-top:2px; }
+        .alert-info { background:var(--cyan-soft); border-color:rgba(0,206,255,0.15); color:var(--cyan); }
+        .alert-warn { background:var(--orange-soft); border-color:rgba(255,165,2,0.15); color:var(--orange); }
+        .alert-danger { background:var(--red-soft); border-color:rgba(255,71,87,0.15); color:var(--red); }
+        .alert-success { background:var(--green-soft); border-color:rgba(0,224,158,0.15); color:var(--green); }
+        .alert p { color: var(--text-secondary); }
+        .alert strong { color: inherit; }
+
+        /* ===================== BADGES ===================== */
+        .badge {
+            display:inline-flex; align-items:center; gap:4px;
+            font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px;
+            padding:4px 10px; border-radius:20px;
+        }
+        .badge-purple { background:var(--purple-soft); color:var(--purple); }
+        .badge-cyan { background:var(--cyan-soft); color:var(--cyan); }
+        .badge-green { background:var(--green-soft); color:var(--green); }
+        .badge-orange { background:var(--orange-soft); color:var(--orange); }
+        .badge-pink { background:var(--pink-soft); color:var(--pink); }
+        .badge-red { background:var(--red-soft); color:var(--red); }
+
+        /* ===================== FLOW DIAGRAM ===================== */
+        .flow {
+            display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+            margin:20px 0; padding:24px; background:var(--bg-card); border:1px solid var(--border);
+            border-radius:var(--radius);
+        }
+        .flow-node {
+            background:var(--purple-soft); border:1px solid rgba(108,92,231,0.2);
+            padding:10px 18px; border-radius:var(--radius-sm); font-size:0.82rem; font-weight:600;
+        }
+        .flow-arrow { color:var(--text-muted); font-size:1.2rem; }
+
+        /* ===================== LEVEL TABLE ===================== */
+        .level-row { display:flex; align-items:center; gap:16px; padding:12px 0; border-bottom:1px solid var(--border); }
+        .level-row:last-child { border-bottom:none; }
+        .level-num { font-family:var(--mono); font-size:0.85rem; font-weight:700; color:var(--purple); width:30px; }
+        .level-icon { font-size:1.3rem; width:30px; text-align:center; }
+        .level-name { font-weight:600; font-size:0.9rem; flex:1; }
+        .level-xp { font-family:var(--mono); font-size:0.8rem; color:var(--text-muted); }
+
+        /* ===================== FEATURE LIST ===================== */
+        .feat-list { list-style:none; }
+        .feat-list li {
+            padding:10px 0; border-bottom:1px solid var(--border);
+            font-size:0.9rem; display:flex; align-items:center; gap:10px;
+        }
+        .feat-list li:last-child { border-bottom:none; }
+        .feat-list .feat-check { color:var(--green); font-weight:700; }
+
+        /* ===================== FILE TREE ===================== */
+        .file-tree {
+            background:var(--bg-code); border:1px solid var(--border); border-radius:var(--radius-sm);
+            padding:20px 24px; font-family:var(--mono); font-size:0.82rem; line-height:2;
+        }
+        .file-tree .folder { color:var(--cyan); font-weight:600; }
+        .file-tree .file { color:var(--text-secondary); }
+        .file-tree .desc { color:var(--text-muted); font-style:italic; }
+
+        /* ===================== LISTS ===================== */
+        ul, ol { padding-left:24px; margin:8px 0; }
+        li { margin:4px 0; font-size:0.9rem; }
+
+        /* ===================== DIVIDER ===================== */
+        hr { border:none; border-top:1px solid var(--border); margin:40px 0; }
+
+        /* ===================== SCROLLBAR ===================== */
+        ::-webkit-scrollbar { width:5px; height:5px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:3px; }
+        ::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,0.15); }
+
+        /* ===================== BACK TO TOP ===================== */
+        .back-top {
+            position:fixed; bottom:28px; right:28px; width:44px; height:44px;
+            background:var(--gradient-main); border:none; border-radius:50%;
+            color:white; font-size:1.2rem; cursor:pointer;
+            display:flex; align-items:center; justify-content:center;
+            box-shadow:0 4px 20px rgba(108,92,231,0.4);
+            opacity:0; transform:translateY(20px);
+            transition: all 0.3s ease; z-index:50;
+        }
+        .back-top.visible { opacity:1; transform:translateY(0); }
+        .back-top:hover { transform:translateY(-3px) scale(1.05); }
+
+        /* ===================== FOOTER ===================== */
+        .doc-footer {
+            text-align:center; padding:32px 0; border-top:1px solid var(--border);
+            font-size:0.8rem; color:var(--text-muted);
+        }
+
+        /* ===================== RESPONSIVE ===================== */
+        @media (max-width:900px) {
+            .sidebar { transform:translateX(-100%); }
+            .sidebar.open { transform:translateX(0); }
+            .sidebar-overlay.open { display:block; }
+            .topbar { display:flex; }
+            .main { margin-left:0; padding:80px 20px 60px; }
+            .hero h1 { font-size:1.6rem; }
+            .hero { padding:32px 24px; }
+            .card-grid { grid-template-columns:1fr; }
+            .hero-meta { flex-direction:column; gap:8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- MOBILE TOPBAR -->
+    <div class="topbar">
+        <h1>📚 StudyHub Docs</h1>
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    </div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="url(#g1)" stroke-width="2"><defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#6C5CE7"/><stop offset="100%" style="stop-color:#00CEFF"/></linearGradient></defs><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+                <div>
+                    <h1>StudyHub</h1>
+                    <small>Project Documentation</small>
+                </div>
+            </div>
+
+            <div class="sidebar-label">Overview</div>
+            <ul class="sidebar-nav">
+                <li><a href="#overview" class="active" onclick="navClick(this)"><span class="nav-emoji">🎯</span> Overview</a></li>
+                <li><a href="#architecture" onclick="navClick(this)"><span class="nav-emoji">🏗️</span> Arsitektur</a></li>
+                <li><a href="#navigation" onclick="navClick(this)"><span class="nav-emoji">🧭</span> Navigasi</a></li>
+            </ul>
+
+            <div class="sidebar-label">Fitur</div>
+            <ul class="sidebar-nav">
+                <li><a href="#dashboard" onclick="navClick(this)"><span class="nav-emoji">🏠</span> Dashboard</a></li>
+                <li><a href="#vacation" onclick="navClick(this)"><span class="nav-emoji">🏖️</span> Mode Liburan</a></li>
+                <li><a href="#semester" onclick="navClick(this)"><span class="nav-emoji">🎓</span> Mode Semester</a></li>
+                <li><a href="#timer" onclick="navClick(this)"><span class="nav-emoji">⏱️</span> Timer & Focus</a></li>
+                <li><a href="#gamification" onclick="navClick(this)"><span class="nav-emoji">🎮</span> Gamification <span class="nav-badge">NEW</span></a></li>
+                <li><a href="#stats" onclick="navClick(this)"><span class="nav-emoji">📈</span> Statistik</a></li>
+                <li><a href="#share" onclick="navClick(this)"><span class="nav-emoji">📸</span> Share Card</a></li>
+                <li><a href="#settings" onclick="navClick(this)"><span class="nav-emoji">⚙️</span> Settings</a></li>
+            </ul>
+
+            <div class="sidebar-label">Teknis</div>
+            <ul class="sidebar-nav">
+                <li><a href="#data-model" onclick="navClick(this)"><span class="nav-emoji">💾</span> Data Model</a></li>
+                <li><a href="#file-structure" onclick="navClick(this)"><span class="nav-emoji">📁</span> File Structure</a></li>
+                <li><a href="#shortcuts" onclick="navClick(this)"><span class="nav-emoji">⌨️</span> Shortcuts</a></li>
+                <li><a href="#verification" onclick="navClick(this)"><span class="nav-emoji">✅</span> Verification</a></li>
+            </ul>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main">
+
+            <!-- HERO -->
+            <section class="hero" id="overview">
+                <div class="hero-badge">📄 Project Documentation v2.0</div>
+                <h1>StudyHub — Academic Tracker for Gen Z</h1>
+                <p>Aplikasi web personal untuk mahasiswa dengan <strong>gamification</strong>, <strong>dual mode</strong> (Liburan &amp; Semester), dan fitur yang bikin Gen Z <strong>ketagihan belajar</strong>.</p>
+                <div class="hero-meta">
+                    <div class="hero-meta-item">📦 <span>6 Files</span></div>
+                    <div class="hero-meta-item">🛠️ <span>HTML + CSS + JS</span></div>
+                    <div class="hero-meta-item">💾 <span>localStorage</span></div>
+                    <div class="hero-meta-item">🎨 <span>Dark Theme</span></div>
+                </div>
+            </section>
+
+            <!-- ARCHITECTURE -->
+            <section class="doc-section" id="architecture">
+                <h2><span class="sec-emoji">🏗️</span> Arsitektur Sistem</h2>
+                <p class="sec-desc">Single Page App (SPA) dengan hash-based routing, tanpa framework, tanpa backend.</p>
+
+                <div class="flow">
+                    <div class="flow-node">🏠 Dashboard</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-node">🏖️ Mode Liburan / 🎓 Mode Semester</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-node">📚 CRUD Matkul</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-node">📅 Jadwal</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-node">✅ Tugas</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-node">📊 Nilai &amp; IPK</div>
+                </div>
+                <div class="flow">
+                    <div class="flow-node">⏱️ Timer &amp; Focus</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-node">🎮 Gamification (XP, Badge, Streak)</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-node">📈 Stats &amp; Heatmap</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-node">📸 Share Card</div>
+                </div>
+            </section>
+
+            <!-- NAVIGATION -->
+            <section class="doc-section" id="navigation">
+                <h2><span class="sec-emoji">🧭</span> Navigasi</h2>
+                <p class="sec-desc">Sidebar di desktop, bottom tab bar di mobile. Floating Action Button untuk quick add.</p>
+
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>🖥️ Desktop</h4>
+                        <p style="font-size:0.85rem;color:var(--text-secondary)">Sidebar tetap di kiri dengan 8 halaman + XP bar + streak display. Content area di kanan.</p>
+                    </div>
+                    <div class="card">
+                        <h4>📱 Mobile</h4>
+                        <p style="font-size:0.85rem;color:var(--text-secondary)">Bottom tab bar (5 ikon utama) + hamburger menu untuk sisanya. FAB "+" melayang di kanan bawah.</p>
+                    </div>
+                </div>
+            </section>
+
+            <hr>
+
+            <!-- DASHBOARD -->
+            <section class="doc-section" id="dashboard">
+                <h2><span class="sec-emoji">🏠</span> Dashboard</h2>
+                <p class="sec-desc">Halaman utama dengan overview lengkap, motivasi, dan quick actions.</p>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Elemen</th><th>Detail</th></tr></thead>
+                        <tbody>
+                            <tr><td>💬 Greeting Dinamis</td><td>"Selamat Pagi, Bro! ☀️" — berubah berdasarkan waktu</td></tr>
+                            <tr><td>🔄 Mode Switcher</td><td>Toggle pill: 🏖️ Liburan ↔ 🎓 Semester</td></tr>
+                            <tr><td>💭 Quote of the Day</td><td>Quote Gen Z-friendly yang berubah tiap hari</td></tr>
+                            <tr><td>📊 Quick Stats</td><td>4 cards: XP/Level, Streak, Jam Belajar, Tasks Pending</td></tr>
+                            <tr><td>📋 Today's Agenda</td><td>List kegiatan/jadwal hari ini</td></tr>
+                            <tr><td>⭕ Progress Ring</td><td>Circular SVG progress — overall completion</td></tr>
+                            <tr><td>⏰ Countdown</td><td>Hitung mundur menuju awal semester</td></tr>
+                            <tr><td>📊 Weekly Mini Chart</td><td>Bar chart jam belajar 7 hari terakhir</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>🤖 Roast Mode &amp; Motivasi System</h3>
+                <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:16px">Pesan dinamis yang berubah berdasarkan behavior pengguna:</p>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Kondisi</th><th>Pesan</th></tr></thead>
+                        <tbody>
+                            <tr><td>Buka pertama kali hari ini</td><td>"Tumben rajin! Lanjutkan! 💪"</td></tr>
+                            <tr><td>Streak &gt; 7 hari</td><td>"7 hari berturut! Kamu monster! 🔥🔥🔥"</td></tr>
+                            <tr><td>Streak putus</td><td>"Woi, streak kamu putus. Mau jadi apa? 💀"</td></tr>
+                            <tr><td>Lama nggak buka (&gt;3 hari)</td><td>"Kirain kamu udah DO... Welcome back! 😂"</td></tr>
+                            <tr><td>Belajar &gt; 3 jam hari ini</td><td>"Touch grass juga kali, Bro 🌿"</td></tr>
+                            <tr><td>Task overdue</td><td>"Ada {x} tugas telat. Dosen nggak nunggu ⚠️"</td></tr>
+                            <tr><td>Buka jam 2-5 pagi</td><td>"Begadang lagi? Besok zombie di kelas 🧟"</td></tr>
+                            <tr><td>Semua task selesai</td><td>"Semua beres! Kamu layak jadi dosen 🎓"</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <hr>
+
+            <!-- VACATION MODE -->
+            <section class="doc-section" id="vacation">
+                <h2><span class="sec-emoji">🏖️</span> Mode Liburan</h2>
+                <p class="sec-desc">Fitur untuk curi start selama liburan semester.</p>
+
+                <div class="card-grid">
+                    <div class="mini-card">
+                        <div class="mc-icon mc-purple">📋</div>
+                        <div>
+                            <h5>CRUD Target Belajar</h5>
+                            <p>Buat & kelola target belajar mandiri dengan subtasks, deadline, dan prioritas.</p>
+                        </div>
+                    </div>
+                    <div class="mini-card">
+                        <div class="mc-icon mc-cyan">📅</div>
+                        <div>
+                            <h5>Daily Planner</h5>
+                            <p>Timeline harian — tambah kegiatan dengan jam, kategori, dan checklist.</p>
+                        </div>
+                    </div>
+                    <div class="mini-card">
+                        <div class="mc-icon mc-green">📖</div>
+                        <div>
+                            <h5>Pre-Study Checklist</h5>
+                            <p>Persiapan per matkul — apa yang mau dipelajari duluan + link resource.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h4>Data Model — Target Belajar</h4>
+<pre>{
+  id: "uuid",
+  title: "Belajar React",
+  description: "Kursus di YouTube",
+  category: "coding",     // coding | baca | sertifikasi | lainnya
+  priority: "high",       // low | medium | high
+  deadline: "2025-08-20",
+  subtasks: [
+    { id: "uuid", text: "Setup project", done: false },
+    { id: "uuid", text: "Belajar useState", done: true }
+  ],
+  xpReward: 50
+}</pre>
+            </section>
+
+            <hr>
+
+            <!-- SEMESTER MODE -->
+            <section class="doc-section" id="semester">
+                <h2><span class="sec-emoji">🎓</span> Mode Semester</h2>
+                <p class="sec-desc">Manajemen akademik lengkap: matkul, jadwal, tugas, dan nilai.</p>
+
+                <h3>📚 CRUD Mata Kuliah</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Field</th><th>Tipe</th><th>Keterangan</th></tr></thead>
+                        <tbody>
+                            <tr><td>Nama Matkul</td><td><code>text</code></td><td>Wajib</td></tr>
+                            <tr><td>Kode Matkul</td><td><code>text</code></td><td>Opsional</td></tr>
+                            <tr><td>SKS</td><td><code>number</code></td><td>Untuk hitung IPK</td></tr>
+                            <tr><td>Tipe</td><td><code>select</code></td><td>Teori / Praktikum / Umum</td></tr>
+                            <tr><td>Dosen</td><td><code>text</code></td><td>Opsional</td></tr>
+                            <tr><td>Ruangan</td><td><code>text</code></td><td>Opsional</td></tr>
+                            <tr><td>Warna</td><td><code>color</code></td><td>Untuk visual jadwal</td></tr>
+                            <tr><td>Emoji</td><td><code>emoji</code></td><td>Opsional</td></tr>
+                            <tr><td>Bobot Nilai</td><td><code>object</code></td><td>Custom per matkul (total 100%)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>📅 CRUD Jadwal Kuliah</h3>
+                <div class="alert alert-info">
+                    <span class="alert-icon">💡</span>
+                    <p><strong>Tampilan jadwal:</strong> Weekly Grid View (warna per matkul) + Today View (highlight yang sedang berlangsung) + "Next Up" reminder.</p>
+                </div>
+
+                <h3>✅ CRUD Tugas &amp; Deadline</h3>
+                <div class="alert alert-warn">
+                    <span class="alert-icon">⚠️</span>
+                    <p><strong>Deadline badges:</strong> <span class="badge badge-red">Overdue</span> <span class="badge badge-orange">< 3 hari</span> <span class="badge badge-green">Masih lama</span></p>
+                </div>
+                <p style="font-size:0.9rem;color:var(--text-secondary)">Tampilan: <strong>Kanban view</strong> (To Do → In Progress → Done) + <strong>List view</strong> dengan filter &amp; sort.</p>
+
+                <h3>📊 Nilai &amp; IPK Calculator</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Range</th><th>Huruf</th><th>Bobot</th></tr></thead>
+                        <tbody>
+                            <tr><td>85 — 100</td><td><span class="badge badge-green">A</span></td><td>4.00</td></tr>
+                            <tr><td>80 — 84</td><td><span class="badge badge-green">AB</span></td><td>3.50</td></tr>
+                            <tr><td>70 — 79</td><td><span class="badge badge-cyan">B</span></td><td>3.00</td></tr>
+                            <tr><td>65 — 69</td><td><span class="badge badge-cyan">BC</span></td><td>2.50</td></tr>
+                            <tr><td>55 — 64</td><td><span class="badge badge-orange">C</span></td><td>2.00</td></tr>
+                            <tr><td>45 — 54</td><td><span class="badge badge-orange">D</span></td><td>1.00</td></tr>
+                            <tr><td>0 — 44</td><td><span class="badge badge-red">E</span></td><td>0.00</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="alert alert-success">
+                    <span class="alert-icon">🎯</span>
+                    <p><strong>IPK Simulator:</strong> "Kalau UAS Peng. Web dapat 85, IPK jadi 3.67" — simulasi real-time.</p>
+                </div>
+            </section>
+
+            <hr>
+
+            <!-- TIMER -->
+            <section class="doc-section" id="timer">
+                <h2><span class="sec-emoji">⏱️</span> Timer &amp; Focus System</h2>
+                <p class="sec-desc">Stopwatch, Pomodoro, Focus Mode, dan Ambient Sound.</p>
+
+                <div class="card-grid">
+                    <div class="mini-card">
+                        <div class="mc-icon mc-purple">⏱️</div>
+                        <div>
+                            <h5>Stopwatch</h5>
+                            <p>Start/Pause/Stop manual. Assign ke matkul. Auto-log.</p>
+                        </div>
+                    </div>
+                    <div class="mini-card">
+                        <div class="mc-icon mc-pink">🍅</div>
+                        <div>
+                            <h5>Pomodoro</h5>
+                            <p>25 min focus + 5 min break. Customizable. XP per sesi.</p>
+                        </div>
+                    </div>
+                    <div class="mini-card">
+                        <div class="mc-icon mc-cyan">🔕</div>
+                        <div>
+                            <h5>Focus Mode</h5>
+                            <p>Fullscreen timer. Minimal UI. Tekan Escape untuk keluar.</p>
+                        </div>
+                    </div>
+                    <div class="mini-card">
+                        <div class="mc-icon mc-green">🎵</div>
+                        <div>
+                            <h5>Ambient Sound</h5>
+                            <p>🌧️ Rain · ☕ Cafe · 🌊 Ocean · 🎵 Lofi. Volume slider.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h4>Pomodoro Settings</h4>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Setting</th><th>Default</th><th>Customizable</th></tr></thead>
+                        <tbody>
+                            <tr><td>Focus time</td><td>25 menit</td><td>✅</td></tr>
+                            <tr><td>Short break</td><td>5 menit</td><td>✅</td></tr>
+                            <tr><td>Long break</td><td>15 menit</td><td>✅</td></tr>
+                            <tr><td>Rounds before long break</td><td>4</td><td>✅</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <hr>
+
+            <!-- GAMIFICATION -->
+            <section class="doc-section" id="gamification">
+                <h2><span class="sec-emoji">🎮</span> Gamification System</h2>
+                <p class="sec-desc">XP, Level, Achievements, Streak — belajar kerasa kayak main game.</p>
+
+                <h3>⭐ XP &amp; Cara Mendapatkannya</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Aksi</th><th>XP</th></tr></thead>
+                        <tbody>
+                            <tr><td>Selesai 1 subtask / task kecil</td><td><span class="badge badge-green">+5 XP</span></td></tr>
+                            <tr><td>Selesai 1 tugas kuliah</td><td><span class="badge badge-green">+30 XP</span></td></tr>
+                            <tr><td>Selesai 1 sesi Pomodoro</td><td><span class="badge badge-green">+15 XP</span></td></tr>
+                            <tr><td>Belajar 1 jam (timer)</td><td><span class="badge badge-green">+20 XP</span></td></tr>
+                            <tr><td>Login hari baru</td><td><span class="badge badge-green">+10 XP</span></td></tr>
+                            <tr><td>Streak milestone (7 / 14 / 30)</td><td><span class="badge badge-purple">+50 / +100 / +200</span></td></tr>
+                            <tr><td>Complete 1 matkul</td><td><span class="badge badge-purple">+100 XP</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>🏅 Level System</h3>
+                <div class="card" style="padding:16px 24px">
+                    <div class="level-row"><span class="level-num">1</span><span class="level-icon">🐣</span><span class="level-name">Mahasiswa Baru</span><span class="level-xp">0 XP</span></div>
+                    <div class="level-row"><span class="level-num">2</span><span class="level-icon">📖</span><span class="level-name">Kutu Buku Pemula</span><span class="level-xp">100 XP</span></div>
+                    <div class="level-row"><span class="level-num">3</span><span class="level-icon">🧠</span><span class="level-name">Mulai Paham</span><span class="level-xp">300 XP</span></div>
+                    <div class="level-row"><span class="level-num">4</span><span class="level-icon">💡</span><span class="level-name">Lumayan Pinter</span><span class="level-xp">600 XP</span></div>
+                    <div class="level-row"><span class="level-num">5</span><span class="level-icon">🔥</span><span class="level-name">On Fire</span><span class="level-xp">1,000 XP</span></div>
+                    <div class="level-row"><span class="level-num">6</span><span class="level-icon">⚡</span><span class="level-name">Unstoppable</span><span class="level-xp">1,500 XP</span></div>
+                    <div class="level-row"><span class="level-num">7</span><span class="level-icon">🏆</span><span class="level-name">Dean's List</span><span class="level-xp">2,200 XP</span></div>
+                    <div class="level-row"><span class="level-num">8</span><span class="level-icon">🎓</span><span class="level-name">Cum Laude Material</span><span class="level-xp">3,000 XP</span></div>
+                    <div class="level-row"><span class="level-num">9</span><span class="level-icon">👑</span><span class="level-name">IPK 4.0 Energy</span><span class="level-xp">4,000 XP</span></div>
+                    <div class="level-row"><span class="level-num">10</span><span class="level-icon">🌟</span><span class="level-name">Legend</span><span class="level-xp">5,000 XP</span></div>
+                </div>
+
+                <h3>🏆 Achievements / Badges</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Badge</th><th>Nama</th><th>Kondisi</th></tr></thead>
+                        <tbody>
+                            <tr><td>🎯</td><td>First Blood</td><td>Selesaikan task pertama</td></tr>
+                            <tr><td>🔥</td><td>On Fire</td><td>7 hari streak</td></tr>
+                            <tr><td>🌋</td><td>Volcanic</td><td>30 hari streak</td></tr>
+                            <tr><td>🌙</td><td>Night Owl</td><td>Belajar jam 12 malam - 4 pagi</td></tr>
+                            <tr><td>🌅</td><td>Early Bird</td><td>Belajar sebelum jam 7 pagi</td></tr>
+                            <tr><td>⚡</td><td>Speedrunner</td><td>Selesai tugas H-3 sebelum deadline</td></tr>
+                            <tr><td>📚</td><td>Bookworm</td><td>Belajar > 5 jam dalam 1 hari</td></tr>
+                            <tr><td>🧹</td><td>Clean Slate</td><td>Semua tugas selesai (0 pending)</td></tr>
+                            <tr><td>💎</td><td>Perfectionist</td><td>Nilai A di 1 matkul</td></tr>
+                            <tr><td>🏅</td><td>Semester Champion</td><td>Semua matkul complete</td></tr>
+                            <tr><td>🍅</td><td>Pomodoro Master</td><td>50 sesi Pomodoro selesai</td></tr>
+                            <tr><td>🎵</td><td>Lofi Listener</td><td>10 jam belajar dengan ambient sound</td></tr>
+                            <tr><td>🤓</td><td>Nerd Alert</td><td>Level 10 tercapai</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>🔥 Streak &amp; Daily Challenge</h3>
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>🔥 Streak</h4>
+                        <ul style="font-size:0.85rem;color:var(--text-secondary)">
+                            <li>+1 setiap hari aktif (min 1 task atau 15 min timer)</li>
+                            <li><strong>Streak Freeze:</strong> 1x per minggu, skip tanpa putus</li>
+                            <li>Milestones: 7, 14, 30, 60, 100 hari → bonus XP + badge</li>
+                            <li>Visual fire animation — makin besar seiring streak</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>📋 Daily Challenge</h4>
+                        <ul style="font-size:0.85rem;color:var(--text-secondary)">
+                            <li>"Selesaikan 3 task hari ini" → +25 XP</li>
+                            <li>"Belajar 1 jam tanpa jeda" → +30 XP</li>
+                            <li>"Buat 2 catatan baru" → +15 XP</li>
+                            <li>Berubah tiap hari, seeded by date</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <hr>
+
+            <!-- STATS -->
+            <section class="doc-section" id="stats">
+                <h2><span class="sec-emoji">📈</span> Statistik &amp; Visualisasi</h2>
+                <p class="sec-desc">Heatmap, charts, weekly report — semua data belajar divisualisasikan.</p>
+
+                <div class="card-grid">
+                    <div class="mini-card">
+                        <div class="mc-icon mc-green">🟩</div>
+                        <div>
+                            <h5>GitHub-style Heatmap</h5>
+                            <p>Grid 52×7, warna hijau berdasarkan aktivitas. Hover = tooltip detail.</p>
+                        </div>
+                    </div>
+                    <div class="mini-card">
+                        <div class="mc-icon mc-purple">📊</div>
+                        <div>
+                            <h5>Charts (Canvas)</h5>
+                            <p>Bar, Pie, Line chart — jam belajar per hari, per matkul, progress mingguan.</p>
+                        </div>
+                    </div>
+                    <div class="mini-card">
+                        <div class="mc-icon mc-cyan">📋</div>
+                        <div>
+                            <h5>Weekly Report</h5>
+                            <p>Auto-generated: total jam, tasks, XP, dan perbandingan vs minggu lalu.</p>
+                        </div>
+                    </div>
+                    <div class="mini-card">
+                        <div class="mc-icon mc-orange">🏆</div>
+                        <div>
+                            <h5>Personal Leaderboard</h5>
+                            <p>Ranking diri sendiri per minggu vs minggu-minggu sebelumnya.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <hr>
+
+            <!-- SHARE -->
+            <section class="doc-section" id="share">
+                <h2><span class="sec-emoji">📸</span> Share Card Generator</h2>
+                <p class="sec-desc">Generate gambar progress yang aesthetic untuk di-share ke IG Story / WA.</p>
+
+<pre style="text-align:center;color:var(--purple);font-size:0.85rem">
+┌──────────────────────────────┐
+│   📚 StudyHub Progress       │
+│                              │
+│   👤 [Nama]                  │
+│   ⭐ Level 5 — On Fire       │
+│   🔥 15 hari streak          │
+│                              │
+│   ████████████░░░ 72%        │
+│                              │
+│   ⏱️ 42 jam belajar          │
+│   ✅ 85 tasks selesai        │
+│   🏆 12 badges unlocked      │
+│                              │
+│   Semester Gasal 2025        │
+└──────────────────────────────┘</pre>
+
+                <ul style="font-size:0.85rem;color:var(--text-secondary);margin-top:16px">
+                    <li>Render ke Canvas → download sebagai PNG</li>
+                    <li>Beberapa template & warna tersedia</li>
+                    <li>Bisa share: Progress Card, Achievement Card, Weekly Report Card</li>
+                </ul>
+            </section>
+
+            <hr>
+
+            <!-- SETTINGS -->
+            <section class="doc-section" id="settings">
+                <h2><span class="sec-emoji">⚙️</span> Settings</h2>
+                <p class="sec-desc">Personalisasi pengalaman belajar.</p>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Setting</th><th>Detail</th></tr></thead>
+                        <tbody>
+                            <tr><td>👤 Profil</td><td>Nama panggilan & avatar (emoji picker)</td></tr>
+                            <tr><td>🎨 Theme</td><td>Dark (default), Light, AMOLED Black</td></tr>
+                            <tr><td>🌈 Accent Color</td><td>Purple, Cyan, Green, Pink, Orange, Custom</td></tr>
+                            <tr><td>🖼️ Wallpaper</td><td>Pilih background dashboard dari preset atau upload</td></tr>
+                            <tr><td>🏖️/🎓 Default Mode</td><td>Liburan atau Semester</td></tr>
+                            <tr><td>📅 Tanggal Semester</td><td>Untuk countdown di dashboard</td></tr>
+                            <tr><td>🎯 Target Jam/Hari</td><td>Target belajar harian (default: 2 jam)</td></tr>
+                            <tr><td>🍅 Pomodoro</td><td>Durasi focus, break, long break</td></tr>
+                            <tr><td>🤖 Roast Mode</td><td>On/Off</td></tr>
+                            <tr><td>🔔 Notifikasi</td><td>On/Off untuk deadline reminders</td></tr>
+                            <tr><td>🎵 Ambient</td><td>Default sound</td></tr>
+                            <tr><td>💾 Export/Import</td><td>Backup & restore data (JSON)</td></tr>
+                            <tr><td>🗑️ Reset</td><td>Hapus semua data (double confirm)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <hr>
+
+            <!-- DATA MODEL -->
+            <section class="doc-section" id="data-model">
+                <h2><span class="sec-emoji">💾</span> Data Model</h2>
+                <p class="sec-desc">Semua data disimpan di <code>localStorage</code> dengan key <code>studyhub_data</code>.</p>
+
+<pre>{
+  profile: { name, avatar, settings },
+  mode: "liburan" | "semester",
+
+  // Semester Mode
+  courses: [...],          // Mata Kuliah
+  schedules: [...],        // Jadwal
+  assignments: [...],      // Tugas & Deadline
+
+  // Liburan Mode
+  targets: [...],          // Target Belajar
+  dailyPlans: [...],       // Daily Planner
+  preStudy: [...],         // Pre-Study Checklist
+
+  // Shared
+  notes: [...],            // Catatan
+  timerLogs: [...],        // Riwayat Timer
+
+  // Gamification
+  xp: 0,
+  level: 1,
+  streak: 0,
+  streakFreezeUsed: false,
+  lastActiveDate: null,
+  achievements: [],
+  dailyChallengeDate: null,
+  dailyChallengeCompleted: false,
+
+  // Stats
+  heatmapData: {
+    "2025-07-15": { tasks: 5, minutes: 120 }
+  }
+}</pre>
+            </section>
+
+            <hr>
+
+            <!-- FILE STRUCTURE -->
+            <section class="doc-section" id="file-structure">
+                <h2><span class="sec-emoji">📁</span> File Structure</h2>
+                <p class="sec-desc">6 file, tanpa framework, tanpa build step.</p>
+
+                <div class="file-tree">
+                    <span class="folder">cyber-tracker/</span><br>
+                    ├── <span class="file">index.html</span> <span class="desc">— SPA shell, sidebar, modals, overlays</span><br>
+                    ├── <span class="file">style.css</span> <span class="desc">— Design system, semua component styles</span><br>
+                    ├── <span class="file">data.js</span> <span class="desc">— CRUD operations, localStorage, validation</span><br>
+                    ├── <span class="file">components.js</span> <span class="desc">— Reusable UI: modal, toast, chart, heatmap</span><br>
+                    ├── <span class="file">gamification.js</span> <span class="desc">— XP, levels, achievements, streak, challenges</span><br>
+                    └── <span class="file">app.js</span> <span class="desc">— Router, pages, timer, events, state</span>
+                </div>
+            </section>
+
+            <hr>
+
+            <!-- SHORTCUTS -->
+            <section class="doc-section" id="shortcuts">
+                <h2><span class="sec-emoji">⌨️</span> Keyboard Shortcuts</h2>
+                <p class="sec-desc">Navigasi cepat tanpa mouse.</p>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Key</th><th>Action</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>N</code></td><td>Quick Add (new task/target)</td></tr>
+                            <tr><td><code>T</code></td><td>Toggle Timer</td></tr>
+                            <tr><td><code>Space</code></td><td>Start/Stop Timer (di halaman Timer)</td></tr>
+                            <tr><td><code>F</code></td><td>Toggle Focus Mode</td></tr>
+                            <tr><td><code>1</code> — <code>8</code></td><td>Navigate ke halaman 1-8</td></tr>
+                            <tr><td><code>Escape</code></td><td>Close modal / Exit focus mode</td></tr>
+                            <tr><td><code>/</code></td><td>Global Search</td></tr>
+                            <tr><td><code>?</code></td><td>Show keyboard shortcuts</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <hr>
+
+            <!-- VERIFICATION -->
+            <section class="doc-section" id="verification">
+                <h2><span class="sec-emoji">✅</span> Verification Plan</h2>
+                <p class="sec-desc">Checklist pengujian sebelum siap dipakai.</p>
+
+                <ul class="feat-list">
+                    <li><span class="feat-check">☐</span> CRUD Matkul — Tambah, edit, hapus → data persist setelah refresh</li>
+                    <li><span class="feat-check">☐</span> CRUD Jadwal — Buat jadwal → tampil di weekly view → highlight hari ini</li>
+                    <li><span class="feat-check">☐</span> CRUD Tugas — Tambah → deadline badge benar → kanban drag works</li>
+                    <li><span class="feat-check">☐</span> Nilai &amp; IPK — Input → auto-hitung → simulator akurat</li>
+                    <li><span class="feat-check">☐</span> Timer — Stopwatch &amp; Pomodoro → log tersimpan → XP diberikan</li>
+                    <li><span class="feat-check">☐</span> Gamification — XP ↑ → level up → badge unlock → animation</li>
+                    <li><span class="feat-check">☐</span> Streak — Login tiap hari → naik → freeze works</li>
+                    <li><span class="feat-check">☐</span> Share Card — Generate → download PNG → terlihat bagus</li>
+                    <li><span class="feat-check">☐</span> Heatmap — Data muncul → warna benar → hover tooltip</li>
+                    <li><span class="feat-check">☐</span> Responsive — Desktop sidebar ↔ mobile bottom bar</li>
+                    <li><span class="feat-check">☐</span> Theme — Dark/Light switch → accent color → persist</li>
+                    <li><span class="feat-check">☐</span> Export/Import — Export JSON → import → semua kembali</li>
+                    <li><span class="feat-check">☐</span> Keyboard Shortcuts — Semua shortcut berfungsi</li>
+                    <li><span class="feat-check">☐</span> Focus Mode — Fullscreen → ambient → Escape keluar</li>
+                </ul>
+            </section>
+
+            <!-- FOOTER -->
+            <footer class="doc-footer">
+                <p>📚 StudyHub v2 — Built with ❤️ for Gen Z Students</p>
+                <p style="margin-top:4px">HTML + CSS + JavaScript · No Framework · No Backend</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- BACK TO TOP -->
+    <button class="back-top" id="backTop" onclick="window.scrollTo({top:0})">↑</button>
+
+    <script>
+        // Sidebar toggle (mobile)
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('open');
+        }
+
+        // Nav click
+        function navClick(el) {
+            document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+            el.classList.add('active');
+            // Close sidebar on mobile
+            if (window.innerWidth <= 900) toggleSidebar();
+        }
+
+        // Active nav on scroll
+        const sections = document.querySelectorAll('.doc-section, .hero');
+        const navLinks = document.querySelectorAll('.sidebar-nav a');
+
+        window.addEventListener('scroll', () => {
+            // Back to top
+            const backTop = document.getElementById('backTop');
+            backTop.classList.toggle('visible', window.scrollY > 400);
+
+            // Active section
+            let current = '';
+            sections.forEach(s => {
+                if (window.scrollY >= s.offsetTop - 120) {
+                    current = s.id;
+                }
+            });
+            navLinks.forEach(a => {
+                a.classList.remove('active');
+                if (a.getAttribute('href') === '#' + current) a.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

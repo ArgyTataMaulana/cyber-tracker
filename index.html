@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyHub — Academic Tracker</title>
+    <meta name="description" content="Personal academic tracker with gamification for Gen Z students">
+    <meta name="theme-color" content="#6C5CE7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="dark">
+    <div class="bg-blobs"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
+
+    <!-- MOBILE TOPBAR -->
+    <div class="topbar">
+        <h1>📚 StudyHub</h1>
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    </div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div>
+                    <h1>📚 StudyHub</h1>
+                    <small>Gasal 2025/2026</small>
+                </div>
+            </div>
+            <div class="sidebar-label">Menu</div>
+            <ul class="sidebar-nav" id="sidebarNav">
+                <li><a href="#dashboard" class="active" data-page="dashboard"><span class="nav-emoji">🏠</span> Dashboard</a></li>
+                <li><a href="#courses" data-page="courses"><span class="nav-emoji">📚</span> Mata Kuliah</a></li>
+                <li><a href="#schedule" data-page="schedule"><span class="nav-emoji">📅</span> Jadwal</a></li>
+                <li><a href="#assignments" data-page="assignments"><span class="nav-emoji">✅</span> Tugas</a></li>
+                <li><a href="#grades" data-page="grades"><span class="nav-emoji">📊</span> Nilai & IPK</a></li>
+                <li><a href="#timer" data-page="timer"><span class="nav-emoji">⏱️</span> Timer</a></li>
+                <li><a href="#stats" data-page="stats"><span class="nav-emoji">📈</span> Statistik</a></li>
+                <li><a href="#targets" data-page="targets"><span class="nav-emoji">🎯</span> Target Belajar</a></li>
+                <li><a href="#notes" data-page="notes"><span class="nav-emoji">📝</span> Catatan</a></li>
+                <li><a href="#aimentor" data-page="aimentor"><span class="nav-emoji">🤖</span> AI Mentor</a></li>
+                <li><a href="#achievements" data-page="achievements"><span class="nav-emoji">🏆</span> Achievements</a></li>
+                <li><a href="#settings" data-page="settings"><span class="nav-emoji">⚙️</span> Settings</a></li>
+            </ul>
+            <div class="sidebar-label" style="margin-top:12px">Audio & Focus</div>
+            <div class="audio-controls" style="padding: 0 16px; display:flex; flex-direction:column; gap:8px;">
+                <button class="btn btn-secondary btn-sm" id="btnLofi" onclick="toggleLofi()" style="justify-content:flex-start"><span class="nav-emoji">🎵</span> Lofi Radio: OFF</button>
+                <button class="btn btn-secondary btn-sm" id="btnAmbient" onclick="toggleAmbient()" style="justify-content:flex-start"><span class="nav-emoji">🌧️</span> Hujan: OFF</button>
+                
+                
+            </div>
+            <div class="sidebar-footer" id="sidebarFooter">
+                <div class="sidebar-level"><span class="lv-icon" id="sbLevelIcon">🐣</span> <span id="sbLevelName">Mahasiswa Baru</span></div>
+                <div class="xp-bar-wrap">
+                    <div class="xp-bar-label"><span id="sbXPText">0 / 100 XP</span><span id="sbLevelNum">Lv. 1</span></div>
+                    <div class="xp-bar-track"><div class="xp-bar-fill" id="sbXPBar" style="width:0%"></div></div>
+                </div>
+                <div class="sidebar-streak"><span class="streak-fire">🔥</span> <span id="sbStreak">0</span> hari streak</div>
+            </div>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="main" id="mainContent">
+            <!-- Pages rendered here by app.js -->
+        </main>
+    </div>
+
+    <!-- FAB -->
+    <button class="fab" id="fab" onclick="handleFAB()" title="Quick Add">+</button>
+
+    <!-- BOTTOM NAV (mobile) -->
+    <nav class="bottom-nav" id="bottomNav">
+        <div class="bottom-nav-inner">
+            <a href="#dashboard" data-page="dashboard" class="active"><span class="bnav-icon">🏠</span>Home</a>
+            <a href="#courses" data-page="courses"><span class="bnav-icon">📚</span>Matkul</a>
+            <a href="#assignments" data-page="assignments"><span class="bnav-icon">✅</span>Tugas</a>
+            <a href="#timer" data-page="timer"><span class="bnav-icon">⏱️</span>Timer</a>
+            <a href="#stats" data-page="stats"><span class="bnav-icon">📈</span>Stats</a>
+        </div>
+    </nav>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+        <div class="modal" id="appModal">
+            <div class="modal-header">
+                <h2 id="modalTitle"></h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer" id="modalFooter" style="display:none"></div>
+        </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="search-overlay" id="searchOverlay" onclick="if(event.target===this)closeSearch()">
+        <div class="search-box">
+            <input type="text" class="search-input" id="searchInput" placeholder="🔍 Cari matkul, tugas, catatan..." oninput="handleSearch(this.value)" autofocus>
+            <div class="search-results" id="searchResults"></div>
+        </div>
+    </div>
+
+    <!-- FOCUS MODE -->
+    <div class="focus-overlay" id="focusOverlay">
+        <div class="focus-bg-blob blob-purple"></div>
+        <div class="focus-bg-blob blob-cyan"></div>
+        
+        <button class="focus-close" onclick="exitFocusMode()">✕ ESC</button>
+        
+        <div class="focus-content">
+            <div class="breathing-ring">
+                <div class="focus-timer" id="focusTimer">00:00:00</div>
+            </div>
+            
+            <div class="focus-label" id="focusLabel">Focus Mode</div>
+            
+            <div class="focus-controls">
+                <button class="btn btn-primary" id="focusPlayBtn" onclick="toggleTimer()">⏸ Pause</button>
+                <button class="btn btn-secondary" onclick="exitFocusMode()">Stop</button>
+            </div>
+            
+            <div class="focus-quote" id="focusQuote">"Fokus sekarang, bangga nanti."</div>
+        </div>
+    </div>
+
+    <!-- CONFETTI -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <!-- AUDIO -->
+    <audio id="ambientPlayer" src="https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg" loop preload="none"></audio>
+    
+    <audio id="lofiPlayer" src="https://stream.zeno.fm/f3wvbbqmdg8uv" loop preload="none"></audio>
+
+
+    <!-- SCRIPTS (order matters!) -->
+    <script src="data.js"></script>
+    <script src="gamification.js"></script>
+    <script src="components.js"></script>
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(() => console.log('[PWA] Service Worker registered!'))
+                .catch(err => console.log('[PWA] SW Error:', err));
+        }
+    </script>
+
+    <!-- Command Palette -->
+    <div id="commandPalette" class="command-palette-overlay" style="display:none" onclick="if(event.target===this)closeCommandPalette()">
+        <div class="command-palette">
+            <div class="command-search-wrap">
+                <span class="command-search-icon">⌘</span>
+                <input class="command-search-input" id="commandInput" placeholder="Ketik untuk mencari halaman..." oninput="filterCommands(this.value)" onkeydown="commandKeyNav(event)">
+            </div>
+            <div class="command-results" id="commandResults"></div>
+            <div class="command-footer">Panah ↑↓ navigasi &nbsp;·&nbsp; Enter pilih &nbsp;·&nbsp; Esc tutup</div>
+        </div>
+    </div>
+
+    
+    <!-- 3D ROOM OVERLAY (STATIC & SCROLLABLE) -->
+    <div id="room3d-overlay" class="room3d-overlay" style="display:none">
+        <button class="btn-exit-3d" onclick="toggle3DMode()">❌ Keluar 3D Mode (ESC)</button>
+        
+        <div class="room3d-scroll-area">
+            <img src="lofi_cozy_room.png" class="room3d-bg-img" alt="Cozy Room">
+            
+            <!-- Hotspots -->
+            <div class="hotspot hotspot-laptop" onclick="navFrom3D('dashboard')" title="Buka Dashboard">
+                <div class="hotspot-label">Dashboard</div>
+            </div>
+            
+            <div class="hotspot hotspot-calendar" onclick="navFrom3D('schedule')" title="Buka Jadwal">
+                <div class="hotspot-label">Jadwal Kuliah</div>
+            </div>
+            
+            <div class="hotspot hotspot-books" onclick="navFrom3D('courses')" title="Buka Mata Kuliah">
+                <div class="hotspot-label">Mata Kuliah</div>
+            </div>
+            
+            <div class="hotspot hotspot-clock" onclick="navFrom3D('timer')" title="Buka Timer Pomodoro">
+                <div class="hotspot-label">Pomodoro</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
