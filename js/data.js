@@ -42,7 +42,9 @@ const DEFAULT_STATE = {
     dailyChallengeDate: null,
     dailyChallengeCompleted: false,
     heatmapData: {},
-    pet: { stage: 0, exp: 0, name: 'CyberPet', status: 'happy' }
+    pet: { stage: 0, exp: 0, name: 'CyberPet', status: 'happy' },
+    onboarded: false,
+    updatedAt: null
 };
 
 const STORAGE_KEY = 'studyhub_data';
@@ -74,10 +76,32 @@ function loadState() {
 
 function saveState(s) {
     if (s) _state = s;
+    _state.updatedAt = new Date().toISOString();
+
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(_state));
     } catch (e) {
-        console.error('Failed to save state:', e);
+        console.warn('[Storage Error] LocalStorage penuh / Quota Exceeded. Memulai pembersihan otomatis:', e);
+        try {
+            // Auto-prune old timer logs and ai chats to free up space
+            if (Array.isArray(_state.timerLogs) && _state.timerLogs.length > 50) {
+                _state.timerLogs = _state.timerLogs.slice(-50);
+            }
+            if (Array.isArray(_state.aiChats) && _state.aiChats.length > 20) {
+                _state.aiChats = _state.aiChats.slice(-20);
+            }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(_state));
+            console.log('[Storage Recovery] Auto-pruning berhasil. Data tersimpan.');
+        } catch (innerErr) {
+            console.error('[Storage Error Fatal] Gagal menyimpan data bahkan setelah auto-prune:', innerErr);
+            if (typeof showToast === 'function') {
+                showToast('⚠️ Memori penyimpanan browser penuh! Harap export data & bersihkan browser.', 'warning');
+            }
+        }
+    }
+
+    if (typeof window.syncStateToCloud === 'function') {
+        window.syncStateToCloud(_state);
     }
 }
 

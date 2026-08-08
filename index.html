@@ -31,6 +31,7 @@
                     <h1>📚 StudyHub</h1>
                     <small>Gasal 2025/2026</small>
                 </div>
+                <button class="cloud-sync-badge local" onclick="openAccountModal()" title="Klik untuk mengelola Akun & Cloud Sync">📱 Mode Lokal</button>
             </div>
             <div class="sidebar-label">Menu</div>
             <ul class="sidebar-nav" id="sidebarNav">
@@ -51,7 +52,6 @@
             <div class="audio-controls" style="padding: 0 16px; display:flex; flex-direction:column; gap:8px;">
                 <button class="btn btn-secondary btn-sm" id="btnLofi" onclick="toggleLofi()" style="justify-content:flex-start"><span class="nav-emoji">🎵</span> Lofi Radio: OFF</button>
                 <button class="btn btn-secondary btn-sm" id="btnAmbient" onclick="toggleAmbient()" style="justify-content:flex-start"><span class="nav-emoji">🌧️</span> Hujan: OFF</button>
-                <button class="btn btn-secondary btn-sm" id="btn3DMode" onclick="toggle3DMode()" style="justify-content:flex-start"><span class="nav-emoji">🥽</span> 3D Room: Masuk</button>
             </div>
             <div class="sidebar-footer" id="sidebarFooter">
                 <div class="sidebar-level"><span class="lv-icon" id="sbLevelIcon">🐣</span> <span id="sbLevelName">Mahasiswa Baru</span></div>
@@ -139,6 +139,8 @@
 
 
     <!-- SCRIPTS (order matters!) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
     <script src="js/data.js"></script>
     <script src="js/gamification.js"></script>
     <script src="js/components.js"></script>
@@ -164,29 +166,10 @@
     </div>
 
     
-    <!-- 3D ROOM OVERLAY (STATIC & SCROLLABLE) -->
-    <div id="room3d-overlay" class="room3d-overlay" style="display:none">
-        <button class="btn-exit-3d" onclick="toggle3DMode()">❌ Keluar 3D Mode (ESC)</button>
-        
-        <div class="room3d-scroll-area">
-            <img src="assets/images/lofi_cozy_room.png" class="room3d-bg-img" alt="Cozy Room">
-            
-            <!-- Hotspots -->
-            <div class="hotspot hotspot-laptop" onclick="navFrom3D('dashboard')" title="Buka Dashboard">
-                <div class="hotspot-label">Dashboard</div>
-            </div>
-            
-            <div class="hotspot hotspot-calendar" onclick="navFrom3D('schedule')" title="Buka Jadwal">
-                <div class="hotspot-label">Jadwal Kuliah</div>
-            </div>
-            
-            <div class="hotspot hotspot-books" onclick="navFrom3D('courses')" title="Buka Mata Kuliah">
-                <div class="hotspot-label">Mata Kuliah</div>
-            </div>
-            
-            <div class="hotspot hotspot-clock" onclick="navFrom3D('timer')" title="Buka Timer Pomodoro">
-                <div class="hotspot-label">Pomodoro</div>
-            </div>
+    <!-- INTERACTIVE ONBOARDING OVERLAY (FIGMA DESIGN 100% MATCH) -->
+    <div id="onboardingOverlay" class="onboarding-overlay" style="display:none">
+        <div class="onboarding-container" id="onboardingContainer">
+            <!-- Content rendered dynamically by js/app.js -->
         </div>
     </div>
 </body>

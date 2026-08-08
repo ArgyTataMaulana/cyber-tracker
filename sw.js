@@ -1,8 +1,9 @@
-const CACHE_NAME = 'studyhub-v4';
+const CACHE_NAME = 'studyhub-v14';
 const ASSETS = [
     './',
     './index.html',
     './css/style.css',
+    './js/supabase.js',
     './js/data.js',
     './js/gamification.js',
     './js/components.js',

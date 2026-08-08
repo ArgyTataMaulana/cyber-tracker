@@ -34,6 +34,30 @@ document.addEventListener('DOMContentLoaded', () => {
     motivationInterval = setInterval(() => {
         if (currentPage === 'dashboard') rotateMotivation();
     }, 15000);
+
+    // Check Supabase Cloud session & sync status
+    setTimeout(async () => {
+        if (typeof getCloudUser === 'function') {
+            const user = await getCloudUser();
+            if (user) {
+                updateCloudBadgeStatus('synced');
+                const cloudData = await fetchStateFromCloud();
+                if (cloudData) {
+                    saveState(cloudData);
+                    updateSidebar();
+                    if (currentPage === 'dashboard') renderDashboard();
+                }
+            }
+        }
+    }, 500);
+
+    // Check first-time onboarding for brand new sessions
+    setTimeout(() => {
+        const s = getState();
+        if (!s.onboarded && s.profile.name === 'Bro') {
+            startOnboarding();
+        }
+    }, 1500);
 });
 
 // ==================== AUDIO CONTROLS ====================
@@ -1128,8 +1152,17 @@ function renderSettings() {
             </label>
         </div>
         <div class="glass-card">
+            <div class="sec-title"><span class="st-emoji">☁️</span> Akun & Cloud Sync (Multi-Device)</div>
+            <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:16px">Simpan data tugas, jadwal, dan IPK Anda secara otomatis di Cloud agar tersinkronisasi di HP & Laptop.</p>
+            <div style="display:flex;gap:10px;align-items:center">
+                <button class="btn btn-primary" onclick="openAccountModal()">☁️ Kelola Akun & Cloud Sync</button>
+                <span class="cloud-sync-badge local" onclick="openAccountModal()">📱 Mode Lokal</span>
+            </div>
+        </div>
+        <div class="glass-card">
             <div class="sec-title"><span class="st-emoji">💾</span> Data</div>
             <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <button class="btn btn-primary" onclick="startOnboarding(true)">🚀 Ulang Tour Onboarding</button>
                 <button class="btn btn-success" onclick="exportData();showToast('📤 Data exported!')">📤 Export JSON</button>
                 <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 Import JSON</button>
                 <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
@@ -1525,23 +1558,375 @@ function startCozyEffect() {
     }, 500);
 }
 
-/* ==================== 3D ROOM MODE ==================== */
-let is3DMode = false;
-function toggle3DMode() {
-    is3DMode = !is3DMode;
-    const btn = document.getElementById('btn3DMode');
-    
-    if (is3DMode) {
-        document.body.classList.add('in-3d-mode');
-        if(btn) btn.innerHTML = '<span class="nav-emoji">🥽</span> 3D Room: Aktif';
-        showToast('3D Interactive Mode Diaktifkan! 🎮', 'success');
+/* ==================== ACCOUNT & CLOUD SYNC MODAL ==================== */
+async function openAccountModal() {
+    const user = typeof getCloudUser === 'function' ? await getCloudUser() : null;
+    let modalBody = '';
+
+    if (user) {
+        modalBody = `
+            <div class="account-modal-card">
+                <img src="${user.user_metadata?.avatar_url || 'assets/icons/icon-192.png'}" class="account-avatar" alt="Avatar">
+                <h3 style="margin-bottom:4px">${user.user_metadata?.full_name || 'Pengguna Cloud'}</h3>
+                <p style="color:var(--text-muted);font-size:0.85rem">${user.email}</p>
+                <div style="margin-top:14px" class="cloud-sync-badge synced">☁️ Tersinkronisasi ke Cloud</div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:16px">
+                <button class="btn btn-secondary" style="flex:1" onclick="if(typeof syncStateToCloud==='function')syncStateToCloud(getState());showToast('🔄 Memulai sinkronisasi...','info')">🔄 Sync Sekarang</button>
+                <button class="btn btn-danger" style="flex:1" onclick="logoutCloud()">🚪 Logout</button>
+            </div>
+        `;
     } else {
-        document.body.classList.remove('in-3d-mode');
-        if(btn) btn.innerHTML = '<span class="nav-emoji">🥽</span> 3D Room: Masuk';
+        modalBody = `
+            <div class="account-modal-card">
+                <div style="font-size:2.5rem;margin-bottom:8px">☁️</div>
+                <h3>Hubungkan Akun Cloud</h3>
+                <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:8px">Simpan data tugas, nilai, dan IPK Anda secara otomatis ke Cloud agar bisa diakses dari HP & Laptop mana saja.</p>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:12px">
+                <button class="account-btn-google" onclick="loginWithGoogle()">
+                    <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96z"/></svg>
+                    Masuk dengan Google
+                </button>
+
+                <div style="text-align:center;color:var(--text-muted);font-size:0.75rem;margin:4px 0">- ATAU MAGIC LINK EMAIL -</div>
+
+                <div style="display:flex;gap:8px">
+                    <input type="email" id="cloudEmailInput" class="form-input" placeholder="nama@email.com" style="flex:1">
+                    <button class="btn btn-primary" onclick="const e=document.getElementById('cloudEmailInput').value; if(e) loginWithEmail(e); else showToast('Isi alamat email dulu!','warning');">Kirim Link</button>
+                </div>
+            </div>
+        `;
+    }
+
+    openModal('☁️ Akun & Cloud Sync', modalBody);
+}
+
+/* ==================== INTERACTIVE ONBOARDING WIZARD ==================== */
+let obCurrentStep = 1;
+let obState = {
+    nickname: 'LofiScholar_24',
+    avatar: '👾',
+    avatarName: 'Pixel Alien',
+    mode: 'semester',
+    theme: 'cozy-room',
+    rainAudio: true,
+    lofiAudio: true
+};
+
+const OB_AVATARS = [
+    { icon: '🪐', name: 'Cosmo Explorer' },
+    { icon: '👾', name: 'Pixel Alien' },
+    { icon: '🦉', name: 'Midnight Owl' },
+    { icon: '🦊', name: 'Sly Scholar' },
+    { icon: '☕', name: 'Coffee Cozy' },
+    { icon: '🌙', name: 'Dream Weaver' }
+];
+
+function startOnboarding(force = false) {
+    const s = getState();
+    if (s.profile.name && s.profile.name !== 'Bro') {
+        obState.nickname = s.profile.name;
+    }
+    if (s.profile.avatar) {
+        obState.avatar = s.profile.avatar;
+    }
+    if (s.mode) obState.mode = s.mode;
+    if (s.profile.theme) obState.theme = s.profile.theme;
+
+    obCurrentStep = 1;
+    const overlay = document.getElementById('onboardingOverlay');
+    if (overlay) {
+        overlay.style.setProperty('display', 'flex', 'important');
+        renderOnboardingStep();
+        if (force) showToast('🚀 Onboarding Wizard dibuka!', 'info');
+    } else {
+        console.error('onboardingOverlay element not found!');
+    }
+}
+window.startOnboarding = startOnboarding;
+
+function renderOnboardingStep() {
+    const container = document.getElementById('onboardingContainer');
+    if (!container) return;
+
+    let rightContent = '';
+
+    // Step Stepper Pills (Matching Figma 100%)
+    const stepperHTML = `
+        <div class="onboarding-stepper-header">
+            <div class="ob-step-pill ${obCurrentStep === 1 ? 'active' : (obCurrentStep > 1 ? 'done' : '')}">
+                <span class="ob-step-num">1</span> Identity
+            </div>
+            <div class="ob-step-line ${obCurrentStep > 1 ? 'active' : ''}"></div>
+            <div class="ob-step-pill ${obCurrentStep === 2 ? 'active' : (obCurrentStep > 2 ? 'done' : '')}">
+                <span class="ob-step-num">2</span> Study Mode
+            </div>
+            <div class="ob-step-line ${obCurrentStep > 2 ? 'active' : ''}"></div>
+            <div class="ob-step-pill ${obCurrentStep === 3 ? 'active' : (obCurrentStep > 3 ? 'done' : '')}">
+                <span class="ob-step-num">3</span> Aesthetics
+            </div>
+            <div class="ob-step-line ${obCurrentStep > 3 ? 'active' : ''}"></div>
+            <div class="ob-step-pill ${obCurrentStep === 4 ? 'active' : ''}">
+                <span class="ob-step-num">4</span> Ready
+            </div>
+        </div>
+    `;
+
+    if (obCurrentStep === 1) {
+        rightContent = `
+            <div>
+                ${stepperHTML}
+                <h2 style="font-size:1.6rem;font-weight:900;margin-bottom:8px">Create Your Scholar Profile</h2>
+                <p style="color:var(--text-secondary);font-size:0.88rem;margin-bottom:20px">Pick a custom gamified moniker and choose your starting pixel avatar.</p>
+
+                <div class="form-group" style="margin-bottom:20px">
+                    <label class="form-label" style="font-weight:700">Student Nickname <span style="color:var(--cyan);font-size:0.75rem;float:right">Required</span></label>
+                    <input type="text" class="form-input" id="obNicknameInput" value="${obState.nickname}" placeholder="e.g. LofiScholar_24" oninput="obState.nickname = this.value" style="font-size:1rem;padding:12px 16px;border-color:rgba(0,206,255,0.4)">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" style="font-weight:700">Select Your Avatar</label>
+                    <div class="ob-avatar-grid">
+                        ${OB_AVATARS.map(a => `
+                            <div class="ob-avatar-item ${obState.avatar === a.icon ? 'active' : ''}" onclick="selectObAvatar('${a.icon}', '${a.name}')">
+                                <span class="ob-avatar-icon">${a.icon}</span>
+                                <span class="ob-avatar-name">${a.name}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:24px">
+                <button class="ob-btn-primary" onclick="nextObStep()">Next Step ➔</button>
+            </div>
+        `;
+    } else if (obCurrentStep === 2) {
+        rightContent = `
+            <div>
+                ${stepperHTML}
+                <h2 style="font-size:1.6rem;font-weight:900;margin-bottom:8px">Pick Your Mode</h2>
+                <p style="color:var(--text-secondary);font-size:0.88rem;margin-bottom:20px">Choose how StudyHub configures your dash. You can switch this at any time.</p>
+
+                <div class="ob-mode-card ${obState.mode === 'semester' ? 'active' : ''}" onclick="selectObMode('semester')">
+                    <div class="ob-mode-header">
+                        <div class="ob-mode-title">📚 Semester Mode</div>
+                        <div class="ob-mode-badge">Highly Recommended</div>
+                    </div>
+                    <ul style="color:var(--text-secondary);font-size:0.8rem;padding-left:18px;line-height:1.7">
+                        <li>Track Courses & Live Attendance</li>
+                        <li>Automated GPA Targets & Trackers</li>
+                        <li>Syllabus & Assignment Countdown alerts</li>
+                    </ul>
+                </div>
+
+                <div class="ob-mode-card ${obState.mode === 'liburan' ? 'active' : ''}" onclick="selectObMode('liburan')">
+                    <div class="ob-mode-header">
+                        <div class="ob-mode-title">🏖️ Vacation Mode</div>
+                        <div class="ob-mode-badge" style="color:var(--text-muted)">Self-paced study</div>
+                    </div>
+                    <ul style="color:var(--text-secondary);font-size:0.8rem;padding-left:18px;line-height:1.7">
+                        <li>Pre-study & independent study trackers</li>
+                        <li>Custom personal learning milestones</li>
+                        <li>Cozy daily planner & habit streak builder</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:12px;margin-top:24px">
+                <button class="btn btn-secondary" onclick="prevObStep()" style="padding:14px 20px">← Back</button>
+                <button class="ob-btn-primary" style="flex:1" onclick="nextObStep()">Next Step ➔</button>
+            </div>
+        `;
+    } else if (obCurrentStep === 3) {
+        rightContent = `
+            <div>
+                ${stepperHTML}
+                <h2 style="font-size:1.6rem;font-weight:900;margin-bottom:8px">Customize Your Vibe</h2>
+                <p style="color:var(--text-secondary);font-size:0.88rem;margin-bottom:20px">Configure your aesthetic study workspace. These options adapt visual elements and sounds.</p>
+
+                <div class="form-group" style="margin-bottom:20px">
+                    <label class="form-label" style="font-weight:700">Aesthetic Themes</label>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px">
+                        <button class="btn btn-sm ${obState.theme === 'dark' ? 'btn-primary' : 'btn-secondary'}" onclick="selectObTheme('dark')">🌙 Dark</button>
+                        <button class="btn btn-sm ${obState.theme === 'cozy-room' ? 'btn-primary' : 'btn-secondary'}" onclick="selectObTheme('cozy-room')">☕ Cozy Room</button>
+                        <button class="btn btn-sm ${obState.theme === 'sakura' ? 'btn-primary' : 'btn-secondary'}" onclick="selectObTheme('sakura')">🌸 Sakura</button>
+                        <button class="btn btn-sm ${obState.theme === 'cyberpunk' ? 'btn-primary' : 'btn-secondary'}" onclick="selectObTheme('cyberpunk')">🌆 Cyberpunk</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" style="font-weight:700">Background Lofi Audio</label>
+                    <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+                        <label class="check-item" style="background:rgba(255,255,255,0.03);padding:12px 16px;border-radius:12px;border:1px solid var(--border)">
+                            <input type="checkbox" ${obState.rainAudio ? 'checked' : ''} onchange="obState.rainAudio = this.checked">
+                            <span class="check-mark"></span>
+                            <span class="check-text" style="font-weight:600">🌧️ Cozy Rain Ambient</span>
+                        </label>
+                        <label class="check-item" style="background:rgba(255,255,255,0.03);padding:12px 16px;border-radius:12px;border:1px solid var(--border)">
+                            <input type="checkbox" ${obState.lofiAudio ? 'checked' : ''} onchange="obState.lofiAudio = this.checked">
+                            <span class="check-mark"></span>
+                            <span class="check-text" style="font-weight:600">🎵 Lofi Radio Beats</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:12px;margin-top:24px">
+                <button class="btn btn-secondary" onclick="prevObStep()" style="padding:14px 20px">← Back</button>
+                <button class="ob-btn-primary" style="flex:1" onclick="nextObStep()">Next Step ➔</button>
+            </div>
+        `;
+    } else if (obCurrentStep === 4) {
+        rightContent = `
+            <div>
+                ${stepperHTML}
+                <h2 style="font-size:1.6rem;font-weight:900;margin-bottom:8px">You're All Set! 🎉</h2>
+                <p style="color:var(--text-secondary);font-size:0.88rem;margin-bottom:20px">Your aesthetic space is prepared. Here's a quick recap of your choices.</p>
+
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:16px">
+                    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+                        <span style="font-size:2.5rem">${obState.avatar}</span>
+                        <div>
+                            <h3 style="font-size:1.1rem;font-weight:900">${obState.nickname || 'LofiScholar_24'}</h3>
+                            <span style="color:var(--cyan);font-size:0.75rem;font-weight:700">StudyHub Level 1</span>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;flex-direction:column;gap:10px;font-size:0.85rem">
+                        <div style="display:flex;justify-content:space-between">
+                            <span style="color:var(--text-muted)">Active Track Mode</span>
+                            <span style="font-weight:700;color:var(--text-primary)">${obState.mode === 'semester' ? 'Semester Mode' : 'Vacation Mode'}</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between">
+                            <span style="color:var(--text-muted)">Aesthetic Theme</span>
+                            <span style="font-weight:700;color:var(--cyan)">${obState.theme.toUpperCase()}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background:var(--purple-soft);border:1px solid rgba(108,92,231,0.4);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:20px">
+                    <span style="font-size:1.5rem">🎗️</span>
+                    <div>
+                        <div style="font-weight:800;font-size:0.88rem;color:#ffb86c">XP Multiplier Active (1.5x)</div>
+                        <div style="font-size:0.75rem;color:var(--text-secondary)">Starting off, you'll earn 1.5x study XP and unlock your digital lofi bookshelves!</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:12px;margin-top:16px">
+                <button class="btn btn-secondary" onclick="prevObStep()" style="padding:14px 20px">← Back</button>
+                <button class="ob-btn-primary" style="flex:1" onclick="finishOnboarding()">🚀 Start Studying</button>
+            </div>
+        `;
+    }
+
+    container.innerHTML = `
+        <div class="onboarding-desktop-grid">
+            <!-- LEFT PREVIEW PANEL -->
+            <div class="onboarding-left-panel">
+                <div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <span style="font-size:1.3rem">📚</span>
+                        <h2 style="font-size:1.2rem;font-weight:900;background:var(--gradient-main);-webkit-background-clip:text;-webkit-text-fill-color:transparent">StudyHub</h2>
+                    </div>
+                    
+                    <div style="margin-top:16px">
+                        <h3 style="font-size:1rem;font-weight:800">StudyHub Workspace Preview</h3>
+                        <p style="font-size:0.75rem;color:var(--text-muted)">Your personalized aesthetic workspace. Earn XP to level up your scholar profile.</p>
+                    </div>
+
+                    <div class="onboarding-left-img-wrap">
+                        <img src="assets/images/lofi_cozy_room.png" class="onboarding-left-img" alt="Lofi Room">
+                        <div class="ob-chip-badge">🎗️ XP Multiplier Active (1.5x)</div>
+                        <div class="ob-chip-badge purple">🌧️ Rain & Lofi Radio</div>
+                    </div>
+                </div>
+
+                <div style="background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-top:12px">
+                    <div style="font-size:0.65rem;color:var(--cyan);font-weight:800;letter-spacing:1px;text-transform:uppercase">NOW PLAYING</div>
+                    <div style="font-weight:700;font-size:0.85rem;margin-top:2px">Cozy Moonlight Beats</div>
+                </div>
+            </div>
+
+            <!-- RIGHT STEPPER PANEL -->
+            <div class="onboarding-right-panel">
+                ${rightContent}
+            </div>
+        </div>
+    `;
+}
+
+function selectObAvatar(avatar, name) {
+    obState.avatar = avatar;
+    obState.avatarName = name;
+    renderOnboardingStep();
+}
+
+function selectObMode(mode) {
+    obState.mode = mode;
+    renderOnboardingStep();
+}
+
+function selectObTheme(theme) {
+    obState.theme = theme;
+    document.body.setAttribute('data-theme', theme);
+    renderOnboardingStep();
+}
+
+function nextObStep() {
+    if (obCurrentStep === 1) {
+        const input = document.getElementById('obNicknameInput');
+        if (input && input.value.trim()) {
+            obState.nickname = input.value.trim();
+        }
+    }
+    if (obCurrentStep < 4) {
+        obCurrentStep++;
+        renderOnboardingStep();
     }
 }
 
-function navFrom3D(pageHash) {
-    if (is3DMode) toggle3DMode();
-    location.hash = pageHash;
+function prevObStep() {
+    if (obCurrentStep > 1) {
+        obCurrentStep--;
+        renderOnboardingStep();
+    }
+}
+
+function finishOnboarding() {
+    const s = getState();
+    s.onboarded = true;
+    s.profile.name = obState.nickname || 'LofiScholar_24';
+    s.profile.avatar = obState.avatar || '👾';
+    s.profile.theme = obState.theme || 'cozy-room';
+    s.mode = obState.mode || 'semester';
+
+    saveState(s);
+    applyTheme();
+    updateSidebar();
+
+    // Toggle Audio if selected
+    if (obState.rainAudio && typeof toggleAmbient === 'function' && !ambientPlaying) {
+        toggleAmbient();
+    }
+    if (obState.lofiAudio && typeof toggleLofi === 'function' && !lofiPlaying) {
+        toggleLofi();
+    }
+
+    // Award +50 XP Welcome Bonus
+    if (typeof addXP === 'function') {
+        addXP(50, 'Selamat Datang Pengguna Baru!');
+    }
+
+    // Hide Overlay & Confetti
+    const overlay = document.getElementById('onboardingOverlay');
+    if (overlay) overlay.style.display = 'none';
+
+    if (typeof triggerConfetti === 'function') triggerConfetti();
+    showToast('🎉 Onboarding Selesai! +50 XP diklaim.', 'success');
+
+    route();
 }
