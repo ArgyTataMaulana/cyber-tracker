@@ -567,7 +567,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 
 /* ==================== COZY ROOM THEME ==================== */
 [data-theme='cozy-room'] {
-    --bg-dark: url('lofi_cozy_room.png') no-repeat center center fixed;
+    --bg-dark: url('../assets/images/lofi_cozy_room.png') no-repeat center center fixed;
     --bg-dark-size: cover;
     --bg-card: rgba(25, 25, 35, 0.65);
     --border: rgba(255, 255, 255, 0.1);
@@ -580,10 +580,17 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 body[data-theme='cozy-room'] {
-    background: var(--bg-dark);
-    background-size: cover;
-    background-attachment: fixed;
-    backdrop-filter: blur(2px);
+    background: #0d0d1a;
+}
+body[data-theme='cozy-room']::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background: url('../assets/images/lofi_cozy_room.png') no-repeat center center / cover;
+    z-index: -1;
+    pointer-events: none;
 }
 [data-theme='cozy-room'] .glass-card, [data-theme='cozy-room'] .sidebar, [data-theme='cozy-room'] .pet-container, [data-theme='cozy-room'] .bottom-nav {
     backdrop-filter: blur(12px);
@@ -610,8 +617,17 @@ body[data-theme='cozy-room'] {
 
 /* ==================== ADDITIONAL BACKGROUNDS ==================== */
 body[data-theme='sakura'] {
-    background: url('sakura_bg.png') no-repeat center center fixed;
-    background-size: cover;
+    background: #0d0d1a;
+}
+body[data-theme='sakura']::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background: url('../assets/images/sakura_bg.png') no-repeat center center / cover;
+    z-index: -1;
+    pointer-events: none;
 }
 body[data-theme='sakura'] .glass-card, body[data-theme='sakura'] .sidebar, body[data-theme='sakura'] .pet-container, body[data-theme='sakura'] .bottom-nav {
     backdrop-filter: blur(10px);
@@ -621,8 +637,17 @@ body[data-theme='sakura'] .glass-card, body[data-theme='sakura'] .sidebar, body[
 }
 
 body[data-theme='cyberpunk'] {
-    background: url('cyberpunk_bg.png') no-repeat center center fixed;
-    background-size: cover;
+    background: #05050c;
+}
+body[data-theme='cyberpunk']::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background: url('../assets/images/cyberpunk_bg.png') no-repeat center center / cover;
+    z-index: -1;
+    pointer-events: none;
 }
 body[data-theme='cyberpunk'] .glass-card, body[data-theme='cyberpunk'] .sidebar, body[data-theme='cyberpunk'] .pet-container, body[data-theme='cyberpunk'] .bottom-nav {
     backdrop-filter: blur(15px);
@@ -768,3 +793,169 @@ body[data-theme='cyberpunk'] .glass-card, body[data-theme='cyberpunk'] .sidebar,
 }
 .color-swatch:hover { transform: scale(1.2); }
 .color-swatch.active { transform: scale(1.1); border-color: rgba(255,255,255,0.6); }
+
+/* ==================== 3D ROOM INTERACTIVE MODE ==================== */
+#room3d-overlay, .room3d-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 9999;
+    background: #000;
+    overflow: hidden;
+    display: none;
+}
+
+body.in-3d-mode #room3d-overlay {
+    display: block !important;
+    animation: fadeInRoom 0.5s ease forwards;
+}
+
+@keyframes fadeInRoom {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.room3d-scroll-area {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.room3d-bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Hide standard layout when in 3D mode */
+body.in-3d-mode .layout {
+    display: none !important;
+}
+
+.btn-exit-3d {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background: rgba(10, 10, 30, 0.9);
+    color: #fff;
+    border: 1px solid rgba(255, 71, 87, 0.5);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 1px;
+    z-index: 10000;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+}
+.btn-exit-3d:hover { 
+    background: rgba(255, 71, 87, 1); 
+    border-color: var(--red);
+    transform: translateY(-2px);
+}
+
+/* HOTSPOTS - Futuristic HUD Style */
+.hotspot {
+    position: absolute;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s ease;
+    z-index: 10001;
+}
+
+.hotspot::before {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background: rgba(0, 206, 255, 0.3);
+    border: 2px solid var(--cyan);
+    border-radius: 50%;
+    animation: hudPulse 2s infinite;
+    transition: all 0.3s;
+    box-shadow: 0 0 15px var(--cyan);
+}
+
+.hotspot::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #fff;
+    transition: all 0.3s;
+}
+
+@keyframes hudPulse {
+    0% { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(2.5); opacity: 0; }
+}
+
+.hotspot:hover::before {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    background: rgba(0, 206, 255, 0.15);
+    border: 2px solid var(--cyan);
+    animation: none;
+    box-shadow: inset 0 0 20px rgba(0, 206, 255, 0.3), 0 0 20px rgba(0, 206, 255, 0.5);
+}
+
+.hotspot:hover::after { opacity: 0; }
+
+.hotspot-label {
+    opacity: 0;
+    color: var(--cyan);
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(0,0,0,1);
+    transition: all 0.3s;
+    background: rgba(10,10,25,0.9);
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid rgba(0,206,255,0.4);
+    pointer-events: none;
+    transform: translateY(15px);
+    position: absolute;
+    bottom: -45px;
+    white-space: nowrap;
+}
+
+.hotspot:hover .hotspot-label {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.hotspot-laptop {
+    bottom: 8%;
+    right: 25%;
+    width: 25%;
+    height: 35%;
+}
+
+.hotspot-calendar {
+    top: 5%;
+    left: 20%;
+    width: 15%;
+    height: 25%;
+}
+
+.hotspot-books {
+    bottom: 8%;
+    left: 32%;
+    width: 16%;
+    height: 20%;
+}
+
+.hotspot-clock {
+    top: 30%;
+    right: 18%;
+    width: 12%;
+    height: 25%;
+}

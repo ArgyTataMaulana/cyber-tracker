@@ -23,8 +23,10 @@ const dom = {
 
 const context = vm.createContext(dom);
 
+const path = require('path');
+
 // Load data.js
-const dataCode = fs.readFileSync('C:\\Users\\asus\\.gemini\\antigravity\\scratch\\cyber-tracker\\data.js', 'utf8');
+const dataCode = fs.readFileSync(path.join(__dirname, '../../js/data.js'), 'utf8');
 vm.runInContext(dataCode, context);
 
 // Test Suite

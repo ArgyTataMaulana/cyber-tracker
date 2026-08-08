@@ -1524,3 +1524,24 @@ function startCozyEffect() {
         }
     }, 500);
 }
+
+/* ==================== 3D ROOM MODE ==================== */
+let is3DMode = false;
+function toggle3DMode() {
+    is3DMode = !is3DMode;
+    const btn = document.getElementById('btn3DMode');
+    
+    if (is3DMode) {
+        document.body.classList.add('in-3d-mode');
+        if(btn) btn.innerHTML = '<span class="nav-emoji">🥽</span> 3D Room: Aktif';
+        showToast('3D Interactive Mode Diaktifkan! 🎮', 'success');
+    } else {
+        document.body.classList.remove('in-3d-mode');
+        if(btn) btn.innerHTML = '<span class="nav-emoji">🥽</span> 3D Room: Masuk';
+    }
+}
+
+function navFrom3D(pageHash) {
+    if (is3DMode) toggle3DMode();
+    location.hash = pageHash;
+}

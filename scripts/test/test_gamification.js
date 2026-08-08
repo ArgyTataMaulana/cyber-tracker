@@ -18,8 +18,10 @@ const dom = {
 
 const context = vm.createContext(dom);
 
-const dataCode = fs.readFileSync('C:\\Users\\asus\\.gemini\\antigravity\\scratch\\cyber-tracker\\data.js', 'utf8');
-const gamificationCode = fs.readFileSync('C:\\Users\\asus\\.gemini\\antigravity\\scratch\\cyber-tracker\\gamification.js', 'utf8');
+const path = require('path');
+
+const dataCode = fs.readFileSync(path.join(__dirname, '../../js/data.js'), 'utf8');
+const gamificationCode = fs.readFileSync(path.join(__dirname, '../../js/gamification.js'), 'utf8');
 
 vm.runInContext(dataCode, context);
 vm.runInContext('function showToast(msg){} function updateSidebar(){}', context); // Mock UI functions

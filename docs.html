@@ -902,16 +902,27 @@
             <!-- FILE STRUCTURE -->
             <section class="doc-section" id="file-structure">
                 <h2><span class="sec-emoji">📁</span> File Structure</h2>
-                <p class="sec-desc">6 file, tanpa framework, tanpa build step.</p>
+                <p class="sec-desc">Struktur folder terorganisir, tanpa framework, tanpa build step.</p>
 
                 <div class="file-tree">
                     <span class="folder">cyber-tracker/</span><br>
                     ├── <span class="file">index.html</span> <span class="desc">— SPA shell, sidebar, modals, overlays</span><br>
-                    ├── <span class="file">style.css</span> <span class="desc">— Design system, semua component styles</span><br>
-                    ├── <span class="file">data.js</span> <span class="desc">— CRUD operations, localStorage, validation</span><br>
-                    ├── <span class="file">components.js</span> <span class="desc">— Reusable UI: modal, toast, chart, heatmap</span><br>
-                    ├── <span class="file">gamification.js</span> <span class="desc">— XP, levels, achievements, streak, challenges</span><br>
-                    └── <span class="file">app.js</span> <span class="desc">— Router, pages, timer, events, state</span>
+                    ├── <span class="file">docs.html</span> <span class="desc">— Dokumentasi proyek</span><br>
+                    ├── <span class="file">manifest.json</span> <span class="desc">— Web App Manifest (PWA)</span><br>
+                    ├── <span class="file">sw.js</span> <span class="desc">— Service Worker (PWA offline cache)</span><br>
+                    ├── <span class="folder">css/</span><br>
+                    │   └── <span class="file">style.css</span> <span class="desc">— Design system, semua component styles</span><br>
+                    ├── <span class="folder">js/</span><br>
+                    │   ├── <span class="file">data.js</span> <span class="desc">— CRUD operations, localStorage, validation</span><br>
+                    │   ├── <span class="file">gamification.js</span> <span class="desc">— XP, levels, achievements, streak, challenges</span><br>
+                    │   ├── <span class="file">components.js</span> <span class="desc">— Reusable UI: modal, toast, chart, heatmap</span><br>
+                    │   └── <span class="file">app.js</span> <span class="desc">— Router, pages, timer, events, state</span><br>
+                    ├── <span class="folder">assets/</span><br>
+                    │   ├── <span class="folder">icons/</span> <span class="desc">— PWA App Icons</span><br>
+                    │   └── <span class="folder">images/</span> <span class="desc">— Wallpaper & 3D room background</span><br>
+                    └── <span class="folder">scripts/</span><br>
+                        ├── <span class="folder">dev/</span> <span class="desc">— Legacy patch & injection scripts</span><br>
+                        └── <span class="folder">test/</span> <span class="desc">— Unit & integration test scripts</span>
                 </div>
             </section>
 

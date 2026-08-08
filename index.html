@@ -9,9 +9,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="icon-192.png">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="assets/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body data-theme="dark">
     <div class="bg-blobs"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
@@ -51,8 +51,7 @@
             <div class="audio-controls" style="padding: 0 16px; display:flex; flex-direction:column; gap:8px;">
                 <button class="btn btn-secondary btn-sm" id="btnLofi" onclick="toggleLofi()" style="justify-content:flex-start"><span class="nav-emoji">🎵</span> Lofi Radio: OFF</button>
                 <button class="btn btn-secondary btn-sm" id="btnAmbient" onclick="toggleAmbient()" style="justify-content:flex-start"><span class="nav-emoji">🌧️</span> Hujan: OFF</button>
-                
-                
+                <button class="btn btn-secondary btn-sm" id="btn3DMode" onclick="toggle3DMode()" style="justify-content:flex-start"><span class="nav-emoji">🥽</span> 3D Room: Masuk</button>
             </div>
             <div class="sidebar-footer" id="sidebarFooter">
                 <div class="sidebar-level"><span class="lv-icon" id="sbLevelIcon">🐣</span> <span id="sbLevelName">Mahasiswa Baru</span></div>
@@ -140,10 +139,10 @@
 
 
     <!-- SCRIPTS (order matters!) -->
-    <script src="data.js"></script>
-    <script src="gamification.js"></script>
-    <script src="components.js"></script>
-    <script src="app.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/gamification.js"></script>
+    <script src="js/components.js"></script>
+    <script src="js/app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js')
@@ -170,7 +169,7 @@
         <button class="btn-exit-3d" onclick="toggle3DMode()">❌ Keluar 3D Mode (ESC)</button>
         
         <div class="room3d-scroll-area">
-            <img src="lofi_cozy_room.png" class="room3d-bg-img" alt="Cozy Room">
+            <img src="assets/images/lofi_cozy_room.png" class="room3d-bg-img" alt="Cozy Room">
             
             <!-- Hotspots -->
             <div class="hotspot hotspot-laptop" onclick="navFrom3D('dashboard')" title="Buka Dashboard">

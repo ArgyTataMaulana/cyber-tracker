@@ -1,15 +1,18 @@
-const CACHE_NAME = 'studyhub-v2';
+const CACHE_NAME = 'studyhub-v4';
 const ASSETS = [
     './',
     './index.html',
-    './style.css',
-    './data.js',
-    './gamification.js',
-    './components.js',
-    './app.js',
+    './css/style.css',
+    './js/data.js',
+    './js/gamification.js',
+    './js/components.js',
+    './js/app.js',
     './manifest.json',
-    './icon-192.png',
-    './icon-512.png'
+    './assets/icons/icon-192.png',
+    './assets/icons/icon-512.png',
+    './assets/images/lofi_cozy_room.png',
+    './assets/images/cyberpunk_bg.png',
+    './assets/images/sakura_bg.png'
 ];
 
 // Install — cache semua assets
